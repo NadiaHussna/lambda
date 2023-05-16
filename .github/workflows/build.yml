@@ -3,7 +3,7 @@ name: 'Build and upload to S3 Bucket'
 on:
   push:
     branches:
-      - DEV
+      - main
 
 jobs:
   Build_and_Upload:
