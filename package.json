@@ -1,0 +1,27 @@
+{
+  "name": "github-actions-node",
+  "version": "1.0.0",
+  "description": "This is node js cicd pipeline",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest src/app.test.js",
+    "start": "node src"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://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@github.com/haqimRegov/github-actions-node.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/haqimRegov/github-actions-node/issues"
+  },
+  "homepage": "https://github.com/haqimRegov/github-actions-node#readme",
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "jest": "^29.5.0",
+    "supertest": "^6.3.3"
+  }
+}
