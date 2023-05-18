@@ -16,7 +16,7 @@ jobs:
       - name: 'Generate Tag Version'
         id: generate_tag_version
         run: |
-          TAG=$(date +%Y%m%d)-$(date +%H%M%S)
+          TAG=updated-lambda
           echo "tag=$TAG" >> $GITHUB_OUTPUT
           echo "Tag Version: $TAG" >> $GITHUB_STEP_SUMMARY
     
