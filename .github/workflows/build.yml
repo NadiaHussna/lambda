@@ -38,6 +38,17 @@ jobs:
 
       - name: 'Upload to S3 Bucket'
         run: aws s3 cp ${{ steps.create_package.outputs.package_name }} s3://${{ secrets.AWS_S3_BUCKET_NAME }}
+        
+      - uses: actions/github-script@v6
+        name: 'Create Git Tag'
+        with:
+          script: |
+            github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: 'refs/tags/${{ steps.generate_tag_version.outputs.tag }}',
+              sha: context.sha
+            })
 
 
      
