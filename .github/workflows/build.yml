@@ -3,7 +3,7 @@ name: 'Build and upload to S3 Bucket'
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   Build_and_Upload:
@@ -16,7 +16,7 @@ jobs:
       - name: 'Generate Tag Version'
         id: generate_tag_version
         run: |
-          TAG= $(date +%Y%m%d)-$(date +%H%M%S)
+          TAG=$(date +%Y%m%d)-$(date +%H%M%S)
           echo "tag=$TAG" >> $GITHUB_OUTPUT
           echo "Tag Version: $TAG" >> $GITHUB_STEP_SUMMARY
     
@@ -38,7 +38,8 @@ jobs:
 
       - name: 'Upload to S3 Bucket'
         run: aws s3 cp ${{ steps.create_package.outputs.package_name }} s3://${{ secrets.AWS_S3_BUCKET_NAME }}
-        
+
+
       - uses: actions/github-script@v6
         name: 'Create Git Tag'
         with:
@@ -49,6 +50,3 @@ jobs:
               ref: 'refs/tags/${{ steps.generate_tag_version.outputs.tag }}',
               sha: context.sha
             })
-
-
-     
