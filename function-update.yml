@@ -1,0 +1,124 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: 'Test Delete'
+Parameters:
+  ENV:
+    NoEcho: true 
+    Type: "String" 
+    Default: "DEV"
+    Description: "Environment"
+  Region:
+    NoEcho: true 
+    Type: "String"
+    Default: "us-west-2"
+    Description: "Environment Region"
+  FunctionName:
+    NoEcho: true 
+    Type: "String"
+    AllowedPattern: "^[a-zA-Z0-9]+[a-zA-Z0-9-]+[a-zA-Z0-9]+$"
+    Default: "z-test-2"     ## z-test-2 for branch main. While z-test for branch main
+    Description: "Function Name"
+
+Globals:
+  Function:
+    Runtime: "nodejs12.x"
+    Timeout: 60
+    Handler: index.handler
+    AutoPublishAlias: PROD
+    MemorySize: 128
+    Environment:
+      Variables:
+        ENV: !Ref ENV
+        REGION: !Ref Region
+
+Resources:
+  lambdaIAMRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      RoleName: "LambdaExecutionRole" 
+      Description: Function Role
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Action:
+              - "sts:AssumeRole"
+            Effect: "Allow"
+            Principal:
+              Service:
+                - "lambda.amazonaws.com"
+      Path: /
+      Policies:
+        - PolicyName: "CloudWatch"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - "logs:CreateLogGroup"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Resource:
+                  - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${FunctionName}:*"
+#         - PolicyName: "VPC"
+#           PolicyDocument:
+#             Version: "2012-10-17"
+#             Statement:
+#               - Effect: Allow
+#                 Action:
+#                   - "logs:CreateLogGroup"
+#                   - "logs:CreateLogStream"
+#                   - "logs:PutLogEvents"
+#                   - "ec2:CreateNetworkInterface"
+#                   - "ec2:DescribeNetworkInterfaces"
+#                   - "ec2:DeleteNetworkInterface"
+#                   - "ec2:DescribeInstances"
+#                   - "ec2:AttachNetworkInterface"
+#                   - "ec2:AssignPrivateIpAddresses"
+#                   - "ec2:UnassignPrivateIpAddresses"
+#                 Resource: "*"
+                
+  S3:
+    DependsOn:
+      - lambdaIAMRole
+    Type: "AWS::IAM::Policy"
+    Properties:
+      PolicyName: "S3"
+      Roles:
+        - !Ref lambdaIAMRole
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action: "s3:*"
+            Resource: "arn:aws:s3:::artifact-680/*"
+
+  lambdaLogGroup:
+    Type: "AWS::Logs::LogGroup"
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${FunctionName}"
+      RetentionInDays: 90
+  
+  lambdaFunction:
+    DependsOn:
+      - lambdaIAMRole
+    Type: AWS::Serverless::Function
+    Properties:
+      Description: 'GitActions'
+      FunctionName: !Ref "FunctionName"
+      Handler: index.handler
+                                   #CodeUri: ./build     #GitActions Codepipeline      #Observation: Doesn't deploy in gitactions script. Do uncomment below for trial
+                                   #s3://artifact-680/20230516-073753.zip
+      CodeUri: s3://artifact-680/updated-lambda.zip   #CLI Cloudformation Creation
+      Role: !GetAtt "lambdaIAMRole.Arn"
+
+Outputs:
+  lambdaArn:
+    Value: !GetAtt "lambdaFunction.Arn"
+    Description: 'ARN for Main lambda'
+    Export:
+      Name: !Sub '${AWS::StackName}-Arn'
+  
+  lambdaName:
+    Value: !Ref lambdaFunction
+    Export:
+      Name: !Sub '${AWS::StackName}-funcName101'
