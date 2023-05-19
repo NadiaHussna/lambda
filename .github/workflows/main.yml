@@ -10,6 +10,11 @@ on:
         description: 'Repo Tag Name (Ex.: yyyymmdd-hhmmss)'
         type: string
         required: true
+  workflow_run:
+    workflows:
+      - 'Build, Upload to S3 Bucket, and Deploy to Lambda Function'
+    types:
+      - completed
 
 jobs:
   Build_Upload_and_Deploy:
@@ -52,6 +57,10 @@ jobs:
             --key ${{ steps.generate_tag_version.outputs.tag }}.zip \
             --cli-read-timeout 60 \
             --cli-connect-timeout 60
+            
+      - name: 'Wait for Approval'
+        id: approval
+        uses: peter-evans/wait-on-approval@v1
 
       - name: 'Configure AWS Lambda Credentials'
         uses: aws-actions/configure-aws-credentials@v1-node16
@@ -70,3 +79,12 @@ jobs:
             --s3-key=${{ github.event.inputs.version || steps.generate_tag_version.outputs.tag }}.zip \
             --cli-read-timeout 60 \
             --cli-connect-timeout 60
+            
+      - name: 'Set Deployment Status'
+        if: steps.approval.outputs.approved == 'true'
+        uses: srt32/deployment-status-action@v1
+        with:
+          token: ${{ secrets.TOKEN_GITHUB }}
+          state: success
+          description: 'Deployment succeeded'
+          environment_url: 'https://github.com/NadiaHussna/lambda.git'
