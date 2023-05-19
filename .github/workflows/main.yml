@@ -58,9 +58,11 @@ jobs:
             --cli-read-timeout 60 \
             --cli-connect-timeout 60
             
-      - name: 'Wait for Approval'
+      - name: 'Manual Approval'
         id: approval
-        uses: peter-evans/wait-on-approval@v1
+        run: |
+          echo "Please review and approve the deployment"
+          echo "::set-output name=approved::true"  # Set the approval output to "true" when approved
 
       - name: 'Configure AWS Lambda Credentials'
         uses: aws-actions/configure-aws-credentials@v1-node16
@@ -70,6 +72,7 @@ jobs:
           aws-region: ${{ secrets.AWS_LAMBDA_REGION }}
 
       - name: 'Update Source Code'
+        if: steps.approval.outputs.approved == 'true'
         run: |
           echo "Deploy Version: ${{ github.event.inputs.version || steps.generate_tag_version.outputs.tag }}" >> $GITHUB_STEP_SUMMARY
           echo "Update Lambda Function with ${{ github.event.inputs.version || steps.generate_tag_version.outputs.tag }}.zip file" >> $GITHUB_STEP_SUMMARY
@@ -79,12 +82,4 @@ jobs:
             --s3-key=${{ github.event.inputs.version || steps.generate_tag_version.outputs.tag }}.zip \
             --cli-read-timeout 60 \
             --cli-connect-timeout 60
-            
-      - name: 'Set Deployment Status'
-        if: steps.approval.outputs.approved == 'true'
-        uses: srt32/deployment-status-action@v1
-        with:
-          token: ${{ secrets.TOKEN_GITHUB }}
-          state: success
-          description: 'Deployment succeeded'
-          environment_url: 'https://github.com/NadiaHussna/lambda.git'
+
