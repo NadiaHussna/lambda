@@ -69,6 +69,7 @@ jobs:
             --cli-connect-timeout 60
             
       - name: 'Check Pull Request Approval'
+        if: ${{github.event_name == 'pull_request'}}
         id: check_approval
         run: |
           APPROVAL_STATUS=$(echo "${{ github.event.review.state }}" | awk '{print tolower($0)}')
