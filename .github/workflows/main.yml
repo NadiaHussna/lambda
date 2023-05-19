@@ -4,17 +4,22 @@ on:
   push:
     branches:
       - main
-  workflow_dispatch:
-    inputs:
-      version:
-        description: 'Repo Tag Name (Ex.: yyyymmdd-hhmmss)'
-        type: string
-        required: true
-  workflow_run:
-    workflows:
-      - 'Build, Upload to S3 Bucket, and Deploy to Lambda Function'
+  pull_request_review:
     types:
-      - completed
+      - submitted
+      
+      
+#   workflow_dispatch:
+#     inputs:
+#       version:
+#         description: 'Repo Tag Name (Ex.: yyyymmdd-hhmmss)'
+#         type: string
+#         required: true
+#   workflow_run:
+#     workflows:
+#       - 'Build, Upload to S3 Bucket, and Deploy to Lambda Function'
+#     types:
+#       - completed
 
 jobs:
   Build_Upload_and_Deploy:
@@ -58,17 +63,28 @@ jobs:
             --cli-read-timeout 60 \
             --cli-connect-timeout 60
             
-      - name: 'Set Approval Status'
-        id: approval
+      - name: 'Check Pull Request Approval'
+        id: check_approval
         run: |
-          echo "::set-output name=approved::false"
+          APPROVAL_STATUS=$(echo "${{ github.event.review.state }}" | awk '{print tolower($0)}')
+          if [[ "$APPROVAL_STATUS" == "approved" ]]; then
+            echo "::set-output name=approved::true"
+          else
+            echo "::set-output name=approved::false"
+          fi
+        
+            
+#       - name: 'Set Approval Status'
+#         id: approval
+#         run: |
+#           echo "::set-output name=approved::false"
 
-      - name: 'Wait for Manual Approval'
-        id: wait_for_approval
-        run: |
-          while [[ ${{ steps.approval.outputs.approved }} != "true" ]]; do
-            sleep 10
-          done
+#       - name: 'Wait for Manual Approval'
+#         id: wait_for_approval
+#         run: |
+#           while [[ ${{ steps.approval.outputs.approved }} != "true" ]]; do
+#             sleep 10
+#           done
 
       - name: 'Configure AWS Lambda Credentials'
         uses: aws-actions/configure-aws-credentials@v1-node16
