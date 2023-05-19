@@ -58,11 +58,17 @@ jobs:
             --cli-read-timeout 60 \
             --cli-connect-timeout 60
             
-      - name: 'Manual Approval'
+      - name: 'Set Approval Status'
         id: approval
         run: |
-          echo "Please review and approve the deployment"
-          echo "::set-output name=approved::true"  # Set the approval output to "true" when approved
+          echo "::set-output name=approved::false"
+
+      - name: 'Wait for Manual Approval'
+        id: wait_for_approval
+        run: |
+          while [[ ${{ steps.approval.outputs.approved }} != "true" ]]; do
+            sleep 10
+          done
 
       - name: 'Configure AWS Lambda Credentials'
         uses: aws-actions/configure-aws-credentials@v1-node16
