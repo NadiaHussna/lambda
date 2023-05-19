@@ -1,4 +1,4 @@
-name: 'Build, Upload to S3 Bucket, and Deploy to Lambda Function new'
+name: 'Build, Upload to S3 Bucket, and Deploy to Lambda Function latest'
 
 on:
   push:
