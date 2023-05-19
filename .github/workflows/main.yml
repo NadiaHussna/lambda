@@ -1,4 +1,4 @@
-name: 'Build, Upload to S3 Bucket, and Deploy to Lambda Function new'
+name: 'Build, Upload to S3 Bucket, and Deploy to Lambda Function'
 
 on:
   push:
@@ -7,8 +7,8 @@ on:
   pull_request:
     branches:
       - main
-    
-  
+      - NadiaHussna-patch-1
+      
   pull_request_review:
     types:
       - submitted
@@ -69,6 +69,7 @@ jobs:
             --cli-connect-timeout 60
             
       - name: 'Check Pull Request Approval'
+        if: ${{github.event_name == 'pull_request'}}
         id: check_approval
         run: |
           APPROVAL_STATUS=$(echo "${{ github.event.review.state }}" | awk '{print tolower($0)}')
