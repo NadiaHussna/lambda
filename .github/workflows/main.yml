@@ -38,8 +38,8 @@ jobs:
       
 # Add the cron job step here
    
-      - name: 'Run Cron Job'
-        run: echo "Cron job step"
+#       - name: 'Run Cron Job'
+#         run: echo "Cron job step"
 
       - name: 'Generate Tag Version'
         id: generate_tag_version
