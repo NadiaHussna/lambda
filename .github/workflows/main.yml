@@ -84,16 +84,16 @@ jobs:
           fi
         
             
-#       - name: 'Set Approval Status'
-#         id: approval
-#         run: |
-#           echo "::set-output name=approved::false"
+      - name: 'Set Approval Status'
+        id: approval
+        run: |
+          echo "::set-output name=approved::false"
 
-#       - name: 'Wait for Manual Approval'
-#         id: wait_for_approval
-#         if: steps.check_approval.outputs.approved == 'false'
-#         run: |
-#           echo "Manual approval required. Please review and approve the pull request."
+      - name: 'Wait for Manual Approval'
+        id: wait_for_approval
+        if: steps.check_approval.outputs.approved == 'false'
+        run: |
+          echo "Manual approval required. Please review and approve the pull request." 
     
 
       - name: 'Configure AWS Lambda Credentials'
