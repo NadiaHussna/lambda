@@ -91,10 +91,10 @@ jobs:
 
       - name: 'Wait for Manual Approval'
         id: wait_for_approval
+        if: steps.check_approval.outputs.approved == 'false'
         run: |
-          while [[ ${{ steps.approval.outputs.approved }} != "true" ]]; do
-            sleep 10
-          done
+          echo "Manual approval required. Please review and approve the pull request."
+    
 
       - name: 'Configure AWS Lambda Credentials'
         uses: aws-actions/configure-aws-credentials@v1-node16
@@ -104,7 +104,7 @@ jobs:
           aws-region: ${{ secrets.AWS_LAMBDA_REGION }}
 
       - name: 'Update Source Code'
-        if: steps.approval.outputs.approved == 'true'
+        if: steps.check_approval.outputs.approved == 'true'
         run: |
           echo "Deploy Version: ${{ github.event.inputs.version || steps.generate_tag_version.outputs.tag }}" >> $GITHUB_STEP_SUMMARY
           echo "Update Lambda Function with ${{ github.event.inputs.version || steps.generate_tag_version.outputs.tag }}.zip file" >> $GITHUB_STEP_SUMMARY
