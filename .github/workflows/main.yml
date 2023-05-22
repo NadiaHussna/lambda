@@ -45,7 +45,7 @@ jobs:
         id: generate_tag_version
         run: |
           TAG=$(date +%Y%m%d)-$(date +%H%M%S)
-          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "tag=$TAG" >> $GITHUB_ENV
           echo "Tag Version: $TAG" >> $GITHUB_STEP_SUMMARY
     
       - name: 'Create Zip File'
@@ -56,7 +56,7 @@ jobs:
           zip -r $PACKAGE_NAME .
 
       - name: 'Configure AWS S3 Credentials'
-        uses: aws-actions/configure-aws-credentials@v1-node16
+        uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_S3_BUCKET_USER_AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_S3_BUCKET_USER_AWS_SECRET_ACCESS_KEY }}
@@ -84,20 +84,20 @@ jobs:
           fi
         
             
-      - name: 'Set Approval Status'
-        id: approval
-        run: |
-          echo "::set-output name=approved::false"
+#       - name: 'Set Approval Status'
+#         id: approval
+#         run: |
+#           echo "::set-output name=approved::false"
 
-      - name: 'Wait for Manual Approval'
-        id: wait_for_approval
-        if: steps.check_approval.outputs.approved == 'false'
-        run: |
-          echo "Manual approval required. Please review and approve the pull request." 
+#       - name: 'Wait for Manual Approval'
+#         id: wait_for_approval
+#         if: steps.check_approval.outputs.approved == 'false'
+#         run: |
+#           echo "Manual approval required. Please review and approve the pull request." 
     
 
       - name: 'Configure AWS Lambda Credentials'
-        uses: aws-actions/configure-aws-credentials@v1-node16
+        uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_LAMBDA_USER_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_LAMBDA_USER_SECRET_ACCESS_KEY }}
