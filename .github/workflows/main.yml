@@ -35,6 +35,11 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v3
+      
+# Add the cron job step here
+   
+      - name: 'Run Cron Job'
+        run: echo "Cron job step"
 
       - name: 'Generate Tag Version'
         id: generate_tag_version
