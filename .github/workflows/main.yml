@@ -87,22 +87,57 @@ jobs:
       - name: 'Request Manual Approval'
         id: approval
         if: steps.check_approval.outputs.approved == 'false'
-        uses: repo-sync/pull-request@v2
+        uses: actions/github-script@v5
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          message: 'Please review and approve the pull request'
-          reviewers: 'aqilahmsrh'
-          approve_label: 'Approve'
-          comment_title: 'Pull Request Approved'
-          comment_body: 'The pull request has been approved and can proceed with deployment.'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const context = github.context;
+            const pr = context.payload.pull_request;
+            const reviews = await github.pulls.listReviews({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pr.number,
+            });
+            const approved = reviews.data.some((review) =>
+              ['aqilahmsrh'].includes(review.user.login) &&
+              review.state === 'APPROVED'
+            );
+            if (approved) {
+              core.setOutput('approved', 'true');
+            } else {
+              core.setOutput('approved', 'false');
+            }
+
+          
+#       - name: 'Request Manual Approval'
+#         id: approval
+#         if: steps.check_approval.outputs.approved == 'false'
+#         uses: repo-sync/pull-request@v2
+#         with:
+#           github_token: ${{ secrets.GITHUB_TOKEN }}
+#           message: 'Please review and approve the pull request'
+#           reviewers: 'aqilahmsrh'
+#           approve_label: 'Approve'
+#           comment_title: 'Pull Request Approved'
+#           comment_body: 'The pull request has been approved and can proceed with deployment.'
+
 
       - name: 'Wait for Manual Approval'
         id: wait_for_approval
         if: steps.approval.outputs.approved == 'false'
-        uses: deepakputhraya/action-wait-for-approval@v1
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          pull_request_number: ${{ github.event.pull_request.number }}
+        run: |
+          echo "Manual approval required. Please review and approve the pull request."
+
+
+
+
+#       - name: 'Wait for Manual Approval'
+#         id: wait_for_approval
+#         if: steps.approval.outputs.approved == 'false'
+#         uses: deepakputhraya/action-wait-for-approval@v1
+#         with:
+#           github_token: ${{ secrets.GITHUB_TOKEN }}
+#           pull_request_number: ${{ github.event.pull_request.number }}
         
             
 #       - name: 'Set Approval Status'
