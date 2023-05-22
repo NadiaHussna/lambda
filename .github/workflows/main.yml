@@ -52,7 +52,7 @@ jobs:
         id: create_package
         run: |
           PACKAGE_NAME="${{ steps.generate_tag_version.outputs.tag }}.zip"
-          echo "package_name=$PACKAGE_NAME" >> $GITHUB_OUTPUT
+          echo "package_name=$PACKAGE_NAME" >> $GITHUB_ENV
           zip -r $PACKAGE_NAME .
 
       - name: 'Configure AWS S3 Credentials'
@@ -63,6 +63,7 @@ jobs:
           aws-region: ${{ secrets.AWS_S3_BUCKET_REGION }}
 
       - name: 'Upload to S3 Bucket'
+        if: steps.approval.outputs.approved == 'true'
         run: aws s3 cp ${{ steps.create_package.outputs.package_name }} s3://${{ secrets.AWS_S3_BUCKET_NAME }}
 
       - name: 'Check S3 Bucket'
@@ -82,6 +83,26 @@ jobs:
           else
             echo "::set-output name=approved::false"
           fi
+          
+      - name: 'Request Manual Approval'
+        id: approval
+        if: steps.check_approval.outputs.approved == 'false'
+        uses: repo-sync/pull-request@v2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          message: 'Please review and approve the pull request'
+          reviewers: 'aqilahmsrh'
+          approve_label: 'Approve'
+          comment_title: 'Pull Request Approved'
+          comment_body: 'The pull request has been approved and can proceed with deployment.'
+
+      - name: 'Wait for Manual Approval'
+        id: wait_for_approval
+        if: steps.approval.outputs.approved == 'false'
+        uses: deepakputhraya/action-wait-for-approval@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          pull_request_number: ${{ github.event.pull_request.number }}
         
             
 #       - name: 'Set Approval Status'
