@@ -106,12 +106,13 @@ jobs:
       - name: 'Update Source Code'
         if: steps.check_approval.outputs.approved == 'true'
         run: |
-          echo "Deploy Version: ${{ github.event.inputs.version || steps.generate_tag_version.outputs.tag }}" >> $GITHUB_STEP_SUMMARY
-          echo "Update Lambda Function with ${{ github.event.inputs.version || steps.generate_tag_version.outputs.tag }}.zip file" >> $GITHUB_STEP_SUMMARY
+          echo "Deploy Version: ${{ steps.generate_tag_version.outputs.tag }}" >> $GITHUB_STEP_SUMMARY
+          echo "Update Lambda Function with ${{ steps.generate_tag_version.outputs.tag }}.zip file" >> $GITHUB_STEP_SUMMARY
           aws lambda update-function-code \
             --function-name=${{ secrets.AWS_LAMBDA_FUNCTION_NAME }} \
             --s3-bucket=${{ secrets.AWS_S3_BUCKET_NAME }} \
             --s3-key=${{ github.event.inputs.version || steps.generate_tag_version.outputs.tag }}.zip \
+            --region ${{ secrets.AWS_LAMBDA_REGION }} \
             --cli-read-timeout 60 \
             --cli-connect-timeout 60
 
