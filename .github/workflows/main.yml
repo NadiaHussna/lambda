@@ -1,174 +1,59 @@
-name: 'Build, Upload to S3 Bucket, and Deploy to Lambda Function new'
-
+name: CICD
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-    
-  
-  pull_request_review:
-    types:
-      - submitted
-      
-      
-#   workflow_dispatch:
-#     inputs:
-#       version:
-#         description: 'Repo Tag Name (Ex.: yyyymmdd-hhmmss)'
-#         type: string
-#         required: true
-#   workflow_run:
-#     workflows:
-#       - 'Build, Upload to S3 Bucket, and Deploy to Lambda Function'
-#     types:
-#       - completed
-
+   push:
+    branches: 
+     - main
+     - DEV
+   pull_request: 
+    branches: 
+     - main
+     - DEV
+   workflow_dispatch:
 jobs:
-  Build_Upload_and_Deploy:
+  Build:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
-    permissions:
-      actions: write
-      contents: write
     steps:
       - uses: actions/checkout@v3
       
-# Add the cron job step here
-   
-#       - name: 'Run Cron Job'
-#         run: echo "Cron job step"
-
-      - name: 'Generate Tag Version'
-        id: generate_tag_version
-        run: |
-          TAG=$(date +%Y%m%d)-$(date +%H%M%S)
-          echo "tag=$TAG" >> $GITHUB_ENV
-          echo "Tag Version: $TAG" >> $GITHUB_STEP_SUMMARY
-    
-      - name: 'Create Zip File'
-        id: create_package
-        run: |
-          PACKAGE_NAME="${{ steps.generate_tag_version.outputs.tag }}.zip"
-          echo "package_name=$PACKAGE_NAME" >> $GITHUB_ENV
-          zip -r $PACKAGE_NAME .
-
-      - name: 'Configure AWS S3 Credentials'
-        uses: aws-actions/configure-aws-credentials@v1
+      - name: AWS Test Configuration
+        uses: aws-actions/configure-aws-credentials@v2
         with:
-          aws-access-key-id: ${{ secrets.AWS_S3_BUCKET_USER_AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_S3_BUCKET_USER_AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_S3_BUCKET_REGION }}
-
-      - name: 'Upload to S3 Bucket'
-        if: steps.approval.outputs.approved == 'true'
-        run: aws s3 cp ${{ steps.create_package.outputs.package_name }} s3://${{ secrets.AWS_S3_BUCKET_NAME }}
-
-      - name: 'Check S3 Bucket'
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      - name: Build Zip File
+        id: build_zip
         run: |
-          aws s3api wait object-exists \
-            --bucket ${{ secrets.AWS_S3_BUCKET_NAME }} \
-            --key ${{ steps.generate_tag_version.outputs.tag }}.zip \
-            --cli-read-timeout 60 \
-            --cli-connect-timeout 60
-            
-      - name: 'Check Pull Request Approval'
-        id: check_approval
-        run: |
-          APPROVAL_STATUS=$(echo "${{ github.event.review.state }}" | awk '{print tolower($0)}')
-          if [[ "$APPROVAL_STATUS" == "approved" ]]; then
-            echo "::set-output name=approved::true"
-          else
-            echo "::set-output name=approved::false"
-          fi
-          
-      - name: 'Request Manual Approval'
-        id: approval
-        if: steps.check_approval.outputs.approved == 'false'
-        uses: actions/github-script@v5
+          # Set a unique identifier for the zip file
+          ZIP_NAME="build-$(date +"%Y-%m-%d-%H-%M-%S").zip"
+          echo "{build}={$ZIP_NAME}" >> $GITHUB_OUTPUT
+          zip -r $ZIP_NAME .
+      - name: 'Create Artifacts'
+        id: 'create_artifacts'
+        uses: actions/upload-artifact@v3
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const context = github.context;
-            const pr = context.payload.pull_request;
-            const reviews = await github.pulls.listReviews({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: pr.number,
-            });
-            const approved = reviews.data.some((review) =>
-              ['aqilahmsrh'].includes(review.user.login) &&
-              review.state === 'APPROVED'
-            );
-            if (approved) {
-              core.setOutput('approved', 'true');
-            } else {
-              core.setOutput('approved', 'false');
-            }
-
-          
-#       - name: 'Request Manual Approval'
-#         id: approval
-#         if: steps.check_approval.outputs.approved == 'false'
-#         uses: repo-sync/pull-request@v2
-#         with:
-#           github_token: ${{ secrets.GITHUB_TOKEN }}
-#           message: 'Please review and approve the pull request'
-#           reviewers: 'aqilahmsrh'
-#           approve_label: 'Approve'
-#           comment_title: 'Pull Request Approved'
-#           comment_body: 'The pull request has been approved and can proceed with deployment.'
-
-
-      - name: 'Wait for Manual Approval'
-        id: wait_for_approval
-        if: steps.approval.outputs.approved == 'false'
-        run: |
-          echo "Manual approval required. Please review and approve the pull request."
-
-
-
-
-#       - name: 'Wait for Manual Approval'
-#         id: wait_for_approval
-#         if: steps.approval.outputs.approved == 'false'
-#         uses: deepakputhraya/action-wait-for-approval@v1
-#         with:
-#           github_token: ${{ secrets.GITHUB_TOKEN }}
-#           pull_request_number: ${{ github.event.pull_request.number }}
-        
-            
-#       - name: 'Set Approval Status'
-#         id: approval
-#         run: |
-#           echo "::set-output name=approved::false"
-
-#       - name: 'Wait for Manual Approval'
-#         id: wait_for_approval
-#         if: steps.check_approval.outputs.approved == 'false'
-#         run: |
-#           echo "Manual approval required. Please review and approve the pull request." 
-    
-
-      - name: 'Configure AWS Lambda Credentials'
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_LAMBDA_USER_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_LAMBDA_USER_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_LAMBDA_REGION }}
-
-      - name: 'Update Source Code'
-        if: steps.check_approval.outputs.approved == 'true'
-        run: |
-          echo "Deploy Version: ${{ steps.generate_tag_version.outputs.tag }}" >> $GITHUB_STEP_SUMMARY
-          echo "Update Lambda Function with ${{ steps.generate_tag_version.outputs.tag }}.zip file" >> $GITHUB_STEP_SUMMARY
-          aws lambda update-function-code \
-            --function-name=${{ secrets.AWS_LAMBDA_FUNCTION_NAME }} \
-            --s3-bucket=${{ secrets.AWS_S3_BUCKET_NAME }} \
-            --s3-key=${{ github.event.inputs.version || steps.generate_tag_version.outputs.tag }}.zip \
-            --region ${{ secrets.AWS_LAMBDA_REGION }} \
-            --cli-read-timeout 60 \
-            --cli-connect-timeout 60
+          name: latest-build
+          path: ${{ github.workspace }}/${{ steps.build_zip.outputs.build }}
+      - name: Upload Zip File to S3
+        run: aws s3 cp ${{ steps.build_zip.outputs.build }} s3://${{ secrets.AWS_S3_BUCKET_NAME }}
+      
+  DeployLambdatoDev:
+    # if: github.event_name == 'pull_request' && success()
+    needs: [Build]
+    runs-on: ubuntu-latest
+    environment:
+      name: LambdaDeployment
+    steps:
+        - name: 'Configure AWS Credentials'
+          uses: aws-actions/configure-aws-credentials@v2
+          with:
+              aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+              aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+              aws-region: ${{ secrets.AWS_REGION }}
+              
+        - name: Deploy to Lambda Function
+          run: |
+              LATEST_ZIP=$(aws s3 ls s3://${{ secrets.AWS_S3_BUCKET_NAME }} --recursive --human-readable --summarize | grep 'build-' | awk '{ print $NF }' | sort -r | head -n 1)
+              aws lambda update-function-code --function-name ${{ secrets.AWS_LAMBDA_NAME }} --s3-bucket ${{ secrets.AWS_S3_BUCKET_NAME }} --s3-key $LATEST_ZIP
+  
 
