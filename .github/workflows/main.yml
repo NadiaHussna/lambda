@@ -3,11 +3,11 @@ on:
    push:
     branches: 
      - main
-     - DEV
+     
    pull_request: 
     branches: 
      - main
-     - DEV
+     
    workflow_dispatch:
 jobs:
   Build:
@@ -18,8 +18,8 @@ jobs:
       - name: AWS Test Configuration
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-access-key-id: ${{ secrets.AWS_S3_BUCKET_USER_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_S3_BUCKET_USER_AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_S3_BUCKET_REGION }}
       - name: Build Zip File
         id: build_zip
@@ -47,8 +47,8 @@ jobs:
         - name: 'Configure AWS Credentials'
           uses: aws-actions/configure-aws-credentials@v2
           with:
-              aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-              aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+              aws-access-key-id: ${{ secrets.AWS_LAMBDA_USER_ACCESS_KEY_ID }}
+              aws-secret-access-key: ${{ secrets.AWS_LAMBDA_USER_SECRET_ACCESS_KEY }}
               aws-region: ${{ secrets.AWS_LAMBDA_REGION }}
               
         - name: Deploy to Lambda Function
