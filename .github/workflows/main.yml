@@ -35,11 +35,18 @@ jobs:
           name: latest-build
           path: ${{ github.workspace }}/${{ steps.build_zip.outputs.build }}
       - name: Upload Zip File to S3
-        run: |
-         ZIP_NAME="${{ steps.build_zip.outputs.build }}"
-         aws s3 cp "${{ github.workspace }}/${ZIP_NAME}" "s3://bucketnad-111/${ZIP_NAME}"
-         env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN_GITHUB }}
+        id: S3
+        with:
+          aws_key_id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY}}
+          aws_bucket: ${{ secrets.AWS_S3_BUCKET_NAME}}
+          source_dir: ${{ github.workspace }}/${{ steps.build_zip.outputs.build }}
+        
+        
+#          ZIP_NAME="${{ steps.build_zip.outputs.build }}"
+#          aws s3 cp "${{ github.workspace }}/${ZIP_NAME}" "s3://bucketnad-111/${ZIP_NAME}"
+#          env:
+#           GITHUB_TOKEN: ${{ secrets.TOKEN_GITHUB }}
           
      # aws s3 cp ${{ github.workspace }}/{{ steps.build_zip.outputs.build }} s3://${{ secrets.AWS_S3_BUCKET_NAME }}/${{ steps.build_zip.outputs.build }} --debug
      #${{ secrets.AWS_S3_BUCKET_NAME }}
