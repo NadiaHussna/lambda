@@ -11,6 +11,7 @@ on:
     branches: 
      - main
      - DEV
+     - NadiaHussna-patch-2
 
    workflow_dispatch:
 
@@ -96,6 +97,7 @@ jobs:
     steps:
       - name: Deploy
         run: echo "Deploying to Staging Environment"
+        
         #This is where the deployment phase should be coded
 
   DeployPre-prodution:
