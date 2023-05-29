@@ -36,10 +36,13 @@ jobs:
           path: ${{ github.workspace }}/${{ steps.build_zip.outputs.build }}
       - name: Upload Zip File to S3
         run: |
-         aws s3 cp ${{ github.workspace }}/{{ steps.build_zip.outputs.build }} s3://${{ secrets.AWS_S3_BUCKET_NAME }}/${{ steps.build_zip.outputs.build }} --debug
+         ZIP_NAME="${{ steps.build_zip.outputs.build }}"
+         aws s3 cp "${{ github.workspace }}/${ZIP_NAME}" "s3://${{ secrets.AWS_S3_BUCKET_NAME }}/${ZIP_NAME}"
          env:
           GITHUB_TOKEN: ${{ secrets.TOKEN_GITHUB }}
-      
+          
+     # aws s3 cp ${{ github.workspace }}/{{ steps.build_zip.outputs.build }} s3://${{ secrets.AWS_S3_BUCKET_NAME }}/${{ steps.build_zip.outputs.build }} --debug
+     
   DeployLambdatoDev:
     # if: github.event_name == 'pull_request' && success()
     needs: [Build]
