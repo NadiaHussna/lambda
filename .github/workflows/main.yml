@@ -1,112 +1,112 @@
-name: 'Build, Upload to S3 Bucket, and Deploy to Lambda Function neww'
+name: CICD
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-      - NadiaHussna-patch-1
-      
-  pull_request_review:
-    types:
-      - submitted
-      
-      
-#   workflow_dispatch:
-#     inputs:
-#       version:
-#         description: 'Repo Tag Name (Ex.: yyyymmdd-hhmmss)'
-#         type: string
-#         required: true
-#   workflow_run:
-#     workflows:
-#       - 'Build, Upload to S3 Bucket, and Deploy to Lambda Function'
-#     types:
-#       - completed
+   push:
+    branches: 
+     - main
+     - DEV
+     - NadiaHussna-patch-2
+
+   pull_request: 
+    branches: 
+     - main
+     - DEV
+
+   workflow_dispatch:
 
 jobs:
-  Build_Upload_and_Deploy:
+  Build:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
-    permissions:
-      actions: write
-      contents: write
+
     steps:
       - uses: actions/checkout@v3
-
-      - name: 'Generate Tag Version'
-        id: generate_tag_version
-        run: |
-          TAG=$(date +%Y%m%d)-$(date +%H%M%S)
-          echo "tag=$TAG" >> $GITHUB_OUTPUT
-          echo "Tag Version: $TAG" >> $GITHUB_STEP_SUMMARY
-    
-      - name: 'Create Zip File'
-        id: create_package
-        run: |
-          PACKAGE_NAME="${{ steps.generate_tag_version.outputs.tag }}.zip"
-          echo "package_name=$PACKAGE_NAME" >> $GITHUB_OUTPUT
-          zip -r $PACKAGE_NAME .
-
-      - name: 'Configure AWS S3 Credentials'
-        uses: aws-actions/configure-aws-credentials@v1-node16
+      
+      - name: AWS Test Configuration
+        uses: aws-actions/configure-aws-credentials@v2
         with:
-          aws-access-key-id: ${{ secrets.AWS_S3_BUCKET_USER_AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_S3_BUCKET_USER_AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_S3_BUCKET_REGION }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: 'Upload to S3 Bucket'
-        run: aws s3 cp ${{ steps.create_package.outputs.package_name }} s3://${{ secrets.AWS_S3_BUCKET_NAME }}
-
-      - name: 'Check S3 Bucket'
+      - name: Build Zip File
+        id: build_zip
         run: |
-          aws s3api wait object-exists \
-            --bucket ${{ secrets.AWS_S3_BUCKET_NAME }} \
-            --key ${{ steps.generate_tag_version.outputs.tag }}.zip \
-            --cli-read-timeout 60 \
-            --cli-connect-timeout 60
-            
-      - name: 'Check Pull Request Approval'
-        id: check_approval
-        run: |
-          APPROVAL_STATUS=$(echo "${{ github.event.review.state }}" | awk '{print tolower($0)}')
-          if [[ "$APPROVAL_STATUS" == "approved" ]]; then
-            echo "::set-output name=approved::true"
-          else
-            echo "::set-output name=approved::false"
-          fi
-        
-            
-#       - name: 'Set Approval Status'
-#         id: approval
-#         run: |
-#           echo "::set-output name=approved::false"
+          # Set a unique identifier for the zip file
+          ZIP_NAME=build-$(date +"%Y-%m-%d-%H-%M-%S").zip
+          
+          # echo "{build}={$ZIP_NAME}" >> $GITHUB_OUTPUT
 
-#       - name: 'Wait for Manual Approval'
-#         id: wait_for_approval
-#         run: |
-#           while [[ ${{ steps.approval.outputs.approved }} != "true" ]]; do
-#             sleep 10
-#           done
+          # Create the zip file with the unique name
+          # zip -r $ZIP_NAME ./src
+          zip -r $ZIP_NAME ./
 
-      - name: 'Configure AWS Lambda Credentials'
-        uses: aws-actions/configure-aws-credentials@v1-node16
+          # Export the zip file name as an output variable
+          # echo "::set-output name=build::$ZIP_NAME"
+          
+      - name: 'Create Artifacts'
+        id: 'create_artifacts'
+        uses: actions/upload-artifact@v3
         with:
-          aws-access-key-id: ${{ secrets.AWS_LAMBDA_USER_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_LAMBDA_USER_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_LAMBDA_REGION }}
+          name: latest-build
+          path: ${{ github.workspace }}/${{ steps.build_zip.outputs.build }}
 
-      - name: 'Update Source Code'
-        if: steps.approval.outputs.approved == 'true'
-        run: |
-          echo "Deploy Version: ${{ github.event.inputs.version || steps.generate_tag_version.outputs.tag }}" >> $GITHUB_STEP_SUMMARY
-          echo "Update Lambda Function with ${{ github.event.inputs.version || steps.generate_tag_version.outputs.tag }}.zip file" >> $GITHUB_STEP_SUMMARY
-          aws lambda update-function-code \
-            --function-name=${{ secrets.AWS_LAMBDA_FUNCTION_NAME }} \
-            --s3-bucket=${{ secrets.AWS_S3_BUCKET_NAME }} \
-            --s3-key=${{ github.event.inputs.version || steps.generate_tag_version.outputs.tag }}.zip \
-            --cli-read-timeout 60 \
-            --cli-connect-timeout 60
+      - name: Upload Zip File to S3
+        run: aws s3 cp ${{ steps.build_zip.outputs.build }} s3://${{ secrets.AWS_S3_BUCKET_NAME }}
+      
+  DeployLambdatoDev:
+    if: github.event_name == 'pull_request' && success()
+    needs: [Build]
+    runs-on: ubuntu-latest
+    environment:
+      name: LambdaDeployment
+    steps:
+        - name: 'Configure AWS Credentials'
+          uses: aws-actions/configure-aws-credentials@v2
+          with:
+              aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+              aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+              aws-region: ${{ secrets.AWS_REGION }}
+              
+        - name: Deploy to Lambda Function
+          run: |
+              LATEST_ZIP=$(aws s3 ls s3://${{ secrets.AWS_S3_BUCKET_NAME }} --recursive --human-readable --summarize | grep 'build-' | awk '{ print $NF }' | sort -r | head -n 1)
+              aws lambda update-function-code --function-name ${{ secrets.AWS_LAMBDA_NAME }} --s3-bucket ${{ secrets.AWS_S3_BUCKET_NAME }} --s3-key $LATEST_ZIP
+  
+  DeploySIT:
+    name: Deploy to SIT Environment
+    if: github.event_name == 'pull_request' && success()
+    needs: [DeployLambdatoDev]
+    runs-on: ubuntu-latest
+    environment:
+      name: develop
+      url: "http://SIT.Reach.com"
+    steps:
+      - name: Deploy
+        run: echo "Deploying to SIT Environment"
+        #This is where the deployment phase should be coded
+  
+  DeployStaging:
+    name: Deploy to Staging Environment
+    if: github.event_name == 'pull_request' && success()
+    needs: [DeploySIT]
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+      url: "http://Staging.Reach.com"
+    steps:
+      - name: Deploy
+        run: echo "Deploying to Staging Environment"
+        #This is where the deployment phase should be coded
 
+  DeployPre-prodution:
+    name: Deploy to Pre-prod Environment
+    if: github.event_name == 'pull_request' && success()
+    needs: [DeployStaging]
+    runs-on: ubuntu-latest
+    environment:
+      name: Pre-production
+      url: "http://Pre-prod.Reach.com"
+    steps:
+      - name: Deploy
+        run: echo "Deploying to Pre-prod Environment"
+        #This is where the deployment phase should be coded
