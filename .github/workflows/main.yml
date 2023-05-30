@@ -1,13 +1,23 @@
-name: test-cicd
+name: CICD
 
 on:
   push:
     branches: 
-      - main
+      - DEV
+      - SIT
+      - UAT
+      - staging
+      - prod
+      - NadiaHussna-patch-4
   
   pull_request: 
     branches:
-      - main
+      - SIT
+      - UAT
+      - staging
+      - prod
+      - NadiaHussna-patch-4
+
   workflow_dispatch:
 
 jobs:
@@ -24,31 +34,29 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Build Zip File
-        id: build_zip
+      - name: 'Create Zip File'
+        id: 'create_package'
         run: |
-          # Set a unique identifier for the zip file
-          ZIP_NAME=build-$(date +"%Y-%m-%d-%H-%M-%S").zip
-
-          # Create the zip file with the unique name
-          # zip -r $ZIP_NAME ./src
-          zip -r $ZIP_NAME ./
-
-          # Export the zip file name as an output variable
-          echo "::set-output name=build::$ZIP_NAME"
+          PACKAGE_NAME=build-$(date +"%Y-%m-%d-%H-%M-%S").zip
+          echo "package_name=$PACKAGE_NAME" >> $GITHUB_OUTPUT
+          zip -r $PACKAGE_NAME .
+          
+      - name: check
+        run: |
+          echo ${{ steps.create_package.outputs.package_name }}
           
       - name: 'Create Artifacts'
         id: 'create_artifacts'
         uses: actions/upload-artifact@v3
         with:
           name: latest-build
-          path: ${{ github.workspace }}/${{ steps.build_zip.outputs.build }}
-
-      - name: Upload Zip File to S3
-        run: aws s3 cp ${{ steps.build_zip.outputs.build }} s3://${{ secrets.AWS_S3_BUCKET_NAME }}
+          path: ${{ github.workspace }}/${{ steps.create_package.outputs.package_name }}
+      
+      - name: 'Upload to S3 Bucket'
+        run: aws s3 cp ${{ steps.create_package.outputs.package_name }} s3://${{ secrets.AWS_S3_BUCKET_NAME }}
       
   DeploytoDev:
-    if: github.event_name == 'pull_request' && success()
+    if: github.event.ref != 'refs/heads/DEV' && github.event_name == 'pull_request'
     needs: [Build]
     runs-on: ubuntu-latest
     environment:
@@ -67,8 +75,8 @@ jobs:
               aws lambda update-function-code --function-name ${{ secrets.AWS_LAMBDA_NAME }} --s3-bucket ${{ secrets.AWS_S3_BUCKET_NAME }} --s3-key $LATEST_ZIP
   
   DeploytoSIT:
-    if: github.event_name == 'pull_request' && success()
-    needs: [DeploytoDev]
+    if: github.event.ref == 'refs/heads/SIT'
+    needs: [Build]
     runs-on: ubuntu-latest
     environment:
       name: SIT
@@ -86,8 +94,8 @@ jobs:
               aws lambda update-function-code --function-name ${{ secrets.AWS_LAMBDA_NAME }} --s3-bucket ${{ secrets.AWS_S3_BUCKET_NAME }} --s3-key $LATEST_ZIP
   
   DeploytoStaging:
-    if: github.event_name == 'pull_request' && success()
-    needs: [DeploytoSIT]
+    if: github.event.ref == 'refs/heads/staging'
+    needs: [Build]
     runs-on: ubuntu-latest
     environment:
       name: staging
@@ -105,8 +113,8 @@ jobs:
               aws lambda update-function-code --function-name ${{ secrets.AWS_LAMBDA_NAME }} --s3-bucket ${{ secrets.AWS_S3_BUCKET_NAME }} --s3-key $LATEST_ZIP
               
   DeploytoProd:
-    if: github.event_name == 'pull_request' && success()
-    needs: [DeploytoStaging]
+    if: github.event.ref == 'refs/heads/prod'
+    needs: [Build]
     runs-on: ubuntu-latest
     environment:
       name: Pre-production
@@ -124,8 +132,8 @@ jobs:
               aws lambda update-function-code --function-name ${{ secrets.AWS_LAMBDA_NAME }} --s3-bucket ${{ secrets.AWS_S3_BUCKET_NAME }} --s3-key $LATEST_ZIP
     
   DeploytoUAT:
-    if: github.event_name == 'pull_request' && success()
-    needs: [DeploytoProd]
+    if: github.event.ref == 'refs/heads/UAT'
+    needs: [Build]
     runs-on: ubuntu-latest
     environment:
       name: UAT
