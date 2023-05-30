@@ -1,17 +1,26 @@
 name: CICD
-#
+
 on:
-   push:
+  push:
     branches: 
-     - main
-     - NadiaHussna-patch-4
+      - DEV
+      - SIT
+      - UAT
+      - staging
+      - prod
+      - release-try
+      - NadiaHussna-patch-4
+  
+  pull_request: 
+    branches:
+      - SIT
+      - UAT
+      - staging
+      - prod
+      - release-try
+      - NadiaHussna-patch-4
 
-   pull_request: 
-    branches: 
-     - main
-     - NadiaHussna-patch-4
-
-   workflow_dispatch:
+  workflow_dispatch:
 
 jobs:
   Build:
@@ -27,50 +36,33 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Build Zip File
-        id: build_zip
+      - name: 'Create Zip File'
+        id: 'create_package'
         run: |
-          # Set a unique identifier for the zip file
-          ZIP_NAME=build-$(date +"%Y-%m-%d-%H-%M-%S").zip
-
-          # Create the zip file with the unique name
-          # zip -r $ZIP_NAME ./src
-          zip -r $ZIP_NAME /home/runner/work/git-acts/git-acts 
-          ZIP_DIR=/Users/runner/work/git-acts/git-acts/$ZIP_NAME
-
-          # Export the zip file name as an output variable
-          # echo "::set-output name=build::$ZIP_NAME"
-          echo $(pwd) 
-          echo $ZIP_DIR
-          echo $(ls -l) 
-          # echo "{build}={$ZIP_NAME}" >> $GITHUB_OUTPUT
+          PACKAGE_NAME=build-$(date +"%Y-%m-%d-%H-%M-%S").zip
+          echo "package_name=$PACKAGE_NAME" >> $GITHUB_OUTPUT
+          zip -r $PACKAGE_NAME .
           
+      - name: check
+        run: |
+          echo ${{ steps.create_package.outputs.package_name }}
           
       - name: 'Create Artifacts'
         id: 'create_artifacts'
         uses: actions/upload-artifact@v3
         with:
           name: latest-build
-          path: /Users/runner/work/git-acts/git-acts/$ZIP_NAME
-
-#       - name: Upload Zip File to S3
-#         run: aws s3 cp ${{ github.workspace }}/${{ steps.build_zip.outputs.build }} s3://${{ secrets.AWS_S3_BUCKET_NAME }}
+          path: ${{ github.workspace }}/${{ steps.create_package.outputs.package_name }}
       
-      - uses: shallwefootball/s3-upload-action@master
-        name: Upload Zip File to S3
-        id: S3
-        with:
-          aws_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY}}
-          aws_bucket: ${{ secrets.AWS_S3_BUCKET_NAME}}
-          source_dir: $ZIP_DIR
+      - name: 'Upload to S3 Bucket'
+        run: aws s3 cp ${{ steps.create_package.outputs.package_name }} s3://${{ secrets.AWS_S3_BUCKET_NAME }}
       
-  DeployLambdatoDev:
-    if: github.event_name == 'pull_request' && success()
+  DeploytoDev:
+    if: github.event.ref != 'refs/heads/DEV' && github.event_name == 'pull_request'
     needs: [Build]
     runs-on: ubuntu-latest
     environment:
-      name: LambdaDeployment
+      name: DEV
     steps:
         - name: 'Configure AWS Credentials'
           uses: aws-actions/configure-aws-credentials@v2
@@ -84,42 +76,78 @@ jobs:
               LATEST_ZIP=$(aws s3 ls s3://${{ secrets.AWS_S3_BUCKET_NAME }} --recursive --human-readable --summarize | grep 'build-' | awk '{ print $NF }' | sort -r | head -n 1)
               aws lambda update-function-code --function-name ${{ secrets.AWS_LAMBDA_NAME }} --s3-bucket ${{ secrets.AWS_S3_BUCKET_NAME }} --s3-key $LATEST_ZIP
   
-#   DeploySIT:
-#     name: Deploy to SIT Environment
-#     if: github.event_name == 'pull_request' && success()
-#     needs: [DeployLambdatoDev]
-#     runs-on: ubuntu-latest
-#     environment:
-#       name: develop
-#       url: "http://SIT.Reach.com"
-#     steps:
-#       - name: Deploy
-#         run: echo "Deploying to SIT Environment"
-#         #This is where the deployment phase should be coded
+  DeploytoSIT:
+    if: github.event.ref == 'refs/heads/SIT'
+    needs: [Build]
+    runs-on: ubuntu-latest
+    environment:
+      name: SIT
+    steps:
+        - name: 'Configure AWS Credentials'
+          uses: aws-actions/configure-aws-credentials@v2
+          with:
+              aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+              aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+              aws-region: ${{ secrets.AWS_REGION }}
+              
+        - name: Deploy to Lambda Function
+          run: |
+              LATEST_ZIP=$(aws s3 ls s3://${{ secrets.AWS_S3_BUCKET_NAME }} --recursive --human-readable --summarize | grep 'build-' | awk '{ print $NF }' | sort -r | head -n 1)
+              aws lambda update-function-code --function-name ${{ secrets.AWS_LAMBDA_NAME }} --s3-bucket ${{ secrets.AWS_S3_BUCKET_NAME }} --s3-key $LATEST_ZIP
   
-#   DeployStaging:
-#     name: Deploy to Staging Environment
-#     if: github.event_name == 'pull_request' && success()
-#     needs: [DeploySIT]
-#     runs-on: ubuntu-latest
-#     environment:
-#       name: staging
-#       url: "http://Staging.Reach.com"
-#     steps:
-#       - name: Deploy
-#         run: echo "Deploying to Staging Environment"
-#         #This is where the deployment phase should be coded
-
-#   DeployPre-prodution:
-#     name: Deploy to Pre-prod Environment
-#     if: github.event_name == 'pull_request' && success()
-#     needs: [DeployStaging]
-#     runs-on: ubuntu-latest
-#     environment:
-#       name: Pre-production
-#       url: "http://Pre-prod.Reach.com"
-#     steps:
-#       - name: Deploy
-#         run: echo "Deploying to Pre-prod Environment"
-#         #This is where the deployment phase should be coded
-
+  DeploytoStaging:
+    if: github.event.ref == 'refs/heads/staging'
+    needs: [Build]
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+    steps:
+        - name: 'Configure AWS Credentials'
+          uses: aws-actions/configure-aws-credentials@v2
+          with:
+              aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+              aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+              aws-region: ${{ secrets.AWS_REGION }}
+              
+        - name: Deploy to Lambda Function
+          run: |
+              LATEST_ZIP=$(aws s3 ls s3://${{ secrets.AWS_S3_BUCKET_NAME }} --recursive --human-readable --summarize | grep 'build-' | awk '{ print $NF }' | sort -r | head -n 1)
+              aws lambda update-function-code --function-name ${{ secrets.AWS_LAMBDA_NAME }} --s3-bucket ${{ secrets.AWS_S3_BUCKET_NAME }} --s3-key $LATEST_ZIP
+              
+  DeploytoProd:
+    if: github.event.ref == 'refs/heads/prod'
+    needs: [Build]
+    runs-on: ubuntu-latest
+    environment:
+      name: Pre-production
+    steps:
+        - name: 'Configure AWS Credentials'
+          uses: aws-actions/configure-aws-credentials@v2
+          with:
+              aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+              aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+              aws-region: ${{ secrets.AWS_REGION }}
+              
+        - name: Deploy to Lambda Function
+          run: |
+              LATEST_ZIP=$(aws s3 ls s3://${{ secrets.AWS_S3_BUCKET_NAME }} --recursive --human-readable --summarize | grep 'build-' | awk '{ print $NF }' | sort -r | head -n 1)
+              aws lambda update-function-code --function-name ${{ secrets.AWS_LAMBDA_NAME }} --s3-bucket ${{ secrets.AWS_S3_BUCKET_NAME }} --s3-key $LATEST_ZIP
+    
+  DeploytoUAT:
+    if: github.event.ref == 'refs/heads/UAT'
+    needs: [Build]
+    runs-on: ubuntu-latest
+    environment:
+      name: UAT
+    steps:
+        - name: 'Configure AWS Credentials'
+          uses: aws-actions/configure-aws-credentials@v2
+          with:
+              aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+              aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+              aws-region: ${{ secrets.AWS_REGION }}
+              
+        - name: Deploy to Lambda Function
+          run: |
+              LATEST_ZIP=$(aws s3 ls s3://${{ secrets.AWS_S3_BUCKET_NAME }} --recursive --human-readable --summarize | grep 'build-' | awk '{ print $NF }' | sort -r | head -n 1)
+              aws lambda update-function-code --function-name ${{ secrets.AWS_LAMBDA_NAME }} --s3-bucket ${{ secrets.AWS_S3_BUCKET_NAME }} --s3-key $LATEST_ZIP
