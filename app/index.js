@@ -1,7 +1,0 @@
-exports.handler = async (event) => {
-  const response = {
-    statusCode: 200,
-    body: JSON.stringify("AWS Lambda and S3 Bucket Testing New NEW")
-  };
-  return response;
-}
