@@ -1,0 +1,5 @@
+{
+  "isMockExport": true,
+  "exportDynamoDB": false,
+  "exportS3Document": false
+}
