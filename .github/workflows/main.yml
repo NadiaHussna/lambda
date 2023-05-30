@@ -3,19 +3,12 @@ name: CICD
 on:
   push:
     branches: 
-      - DEV
-      - SIT
-      - UAT
-      - staging
-      - prod
+      - main
       - NadiaHussna-patch-4
   
   pull_request: 
     branches:
-      - SIT
-      - UAT
-      - staging
-      - prod
+      - main
       - NadiaHussna-patch-4
 
   workflow_dispatch:
