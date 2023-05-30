@@ -1,0 +1,2719 @@
+input TestInput {
+  idNum: String
+}
+
+type CommonOutput {
+  data: CommonResult
+  error: Error
+}
+
+type CommonResult {
+  result: CommonResponse
+}
+
+type CommonResponse {
+  status: Boolean
+  message: String
+}
+
+type Error {
+  errorCode: String
+  message: String
+  statusCode: String
+  errorList: [String]
+}
+
+input LoginInput {
+  username: String!
+  password: String!
+}
+
+type UserLogin @aws_iam {
+  id: ID!
+  username: String!
+  password: String!
+  data: JWTResult
+  error: Error
+}
+
+type IamResult {
+  result: IAMResponse
+}
+
+type IAMResponse {
+  identityId: String!
+  accessKeyId: String!
+  sessionToken: String!
+  secretAccessKey: String!
+  name: String!
+  email: String!
+  role: [String]
+  group: [String]
+  department: String
+  accessLevel: String
+  permission: String
+  username: String!
+  inboxCount: Int
+  branchName: String
+}
+
+type JWTResult {
+  result: JWT
+}
+
+type JWT {
+  accessToken: String
+  idToken: String!
+  refreshToken: String!
+  name: String!
+  email: String!
+  role: [String]
+  group: [String]
+  department: String
+  accessLevel: String
+  permission: String
+  username: String!
+  inboxCount: Int
+  branchName: String
+}
+
+input SnsInput {
+  deviceToken: String!
+}
+
+type Mutation {
+  userLogin(input: LoginInput): UserLogin
+  createSnsEndpoint(input: SnsInput): CommonOutput
+  transactionStatus(input: TransactionStatusInput): CommonOutput
+  createTransactionsRef(input: createTransactionsRefInput): CommonOutput
+  downloadDaily(input: DownloadDailyInput): DownloadReportOutput
+  populateEdd(input: populateEddInput): populateEddOutput
+  createCase(input: NewCaseInput): CommonOutput
+  caseStatus(input: CaseStatusInput): CommonOutput
+  targetDateRequest(input: TargetDateRequestInput): CommonOutput
+  targetDateResponse(input: TargetDateResponseInput): CommonOutput
+  opsStatus(input: OpsStatusInput): CommonOutput
+  financeStatus(input: FinanceStatusInput): CommonOutput
+  updateInbox(input: UpdateInboxInput): CommonOutput
+  createRole(input: RoleInput): CommonOutput
+  createGroup(input: GroupInput): CommonOutput
+  createUser(input: UserAdminInput): CommonOutput
+  editRole(input: EditRoleInput): CommonOutput
+  editGroup(input: EditGroupInput): CommonOutput
+  editUser(input: EditUserAdminInput): CommonOutput
+  fundUpload(input: FundInput): CommonOutput
+  userBulkUpload(input: UserBulkUploadInput): CommonOutput
+  enableOmni(input: IdActionInput): CommonOutput
+  userUpdateStatus(input: IdActionUpdateInput): CommonOutput
+  approveReject(input: ApproveRejectInput): CommonOutput
+  bulkUpload(input: BulkUploadInput): CommonOutput
+  bulkUploadStatus(input: BulkUploadStatusInput): CommonOutput
+  fundStatus(input: FundStatusInput): CommonOutput
+  transactionCheckerStatus(input: ApproveRejectInput): CommonOutput
+  dailySummaryReport(input: DailySummaryReportInput): DailySummaryReportOutput
+  validateDropdown(input: VDropDownInput): VDropDownOutput
+  transactionReport(input: TransactionReportInput): TransactionReportOutput
+  updateSeen(input: SeenInput): CommonOutput
+}
+
+input SeenInput {
+  dashboard: String
+  tab: [String]
+  referenceKey: String
+}
+
+input TransactionReportInput {
+  transactionRef: String
+}
+
+type TransactionReportOutput {
+  data: TransactionReportOutputResult
+  error: Error
+}
+
+type TransactionReportOutputResult {
+  result: TransactionReportOutputResponse
+}
+
+type TransactionReportOutputResponse {
+  status: Boolean
+  message: String
+}
+
+type DailySummaryReportOutput {
+  data: DailySummaryReportOutputResult
+  error: Error
+}
+
+type DailySummaryReportOutputResult {
+  result: DailySummaryReportOutputResponse
+}
+
+type DailySummaryReportOutputResponse {
+  status: Boolean
+  message: String
+  path: String
+}
+
+input DailySummaryReportInput {
+  branchId: String
+}
+
+input ApproveRejectInput {
+  requestId: String
+  action: String
+  remarks: String
+}
+
+input FundStatusInput {
+  fundDocumentId: Int
+  status: String
+  remark: String
+  tab: String
+}
+
+input BulkUploadStatusInput {
+  fundDocumentId: String
+  status: String
+  remark: String
+}
+
+input BulkUploadInput {
+  numberOfDocuments: Int
+  date: String
+  documents: [BulkDocumentsInput]
+}
+
+input BulkDocumentsInput {
+  fileName: String
+  fileSize: Int
+  fundAbbr: String
+  documentType: String
+  path: String
+}
+
+input IdActionInput {
+  id: String
+  action: String
+}
+input IdActionUpdateInput {
+  id: String
+  action: String
+  viewType: String
+}
+input UserBulkUploadInput {
+  document: BulkDocInput
+  data: String
+}
+
+input FundInput {
+  tab: String
+  document: documentInput
+  data: String
+}
+
+input BulkDocInput {
+  fileName: String
+  fileType: String
+  fileSize: Int
+  fileString: String
+}
+
+input documentInput {
+  fileName: String
+  file: String
+  type: String
+  fileSize: Int
+}
+
+input UserAdminInput {
+  username: String
+  ssoId: String
+  name: String
+  status: String
+  branch: String
+  department: String
+  email: String
+  mobileNumber: String
+  description: String
+  userGroup: [String]
+}
+
+input EditUserAdminInput {
+  userId: String
+  ssoId: String
+  name: String
+  status: String
+  branch: String
+  department: String
+  email: String
+  mobileNumber: String
+  description: String
+  userGroup: [String]
+}
+
+input UpdateInboxInput {
+  source: [String]
+}
+
+input FinanceStatusInput {
+  transactionRef: [String!]!
+  status: String!
+  reason: String!
+  remark: String!
+}
+
+input OpsStatusInput {
+  transactionRef: String!
+  status: String!
+  reasonId: String!
+  remark: String
+}
+
+input TargetDateRequestInput {
+  transactionRef: String
+  targetDate: String
+  remark: String
+}
+
+input TargetDateResponseInput {
+  requestId: String
+  targetDate: String
+  action: String
+  remark: String
+}
+
+## PERMISSIONS
+# SHARED PERMISSIONS
+input LoginPermissionInput {
+  canDoPasswordRecovery: String
+}
+
+input InboxPermissionInput {
+  canReadNotifications: String
+}
+
+input ProfilePermissionInput {
+  canViewStaffDetails: String
+}
+
+input LoginActionInput {
+  isAll: String
+  actions: LoginPermissionInput
+}
+
+input InboxActionInput {
+  isAll: String
+  actions: InboxPermissionInput
+}
+
+input ProfileActionInput {
+  isAll: String
+  actions: ProfilePermissionInput
+}
+
+input AccountManagementInput {
+  isAll: String
+  permissionLevel: String
+  login: LoginActionInput
+  inbox: InboxActionInput
+  profile: ProfileActionInput
+}
+
+## CE-BRANCH
+# PENDING TAB
+input CePendingTabInput {
+  canViewTransactionList: String
+  canViewDetails: String
+  canExportList: String
+  canDownloadTransactionReport: String
+  canDownloadDailySummary: String
+  canVerifyTransactions: String
+  canReroute: String
+  canReject: String
+}
+
+input CePendingTabReviewInput {
+  canApproveVerify: String
+  canApproveReRoute: String
+  canApproveReject: String
+}
+
+input CePendingTabActionInput {
+  isAll: String
+  actions: CePendingTabInput
+  reviewApproval: CePendingTabReviewInput
+}
+
+# UPCOMING TAB
+input CeUpcomingTabInput {
+  canViewTransactionList: String
+  canViewDetails: String
+  canExportList: String
+}
+
+input CeUpcomingTabActionInput {
+  isAll: String
+  actions: CeUpcomingTabInput
+}
+
+# HARD COPY TAB
+input CeHardCopyTabInput {
+  canViewTransactionList: String
+  canViewDetails: String
+  canExportList: String
+  canReceiveHardCopy: String
+}
+
+input CeHardCopyTabActionInput {
+  isAll: String
+  actions: CeHardCopyTabInput
+}
+
+# REROUTE TAB
+input CeReRoutedTabInput {
+  canViewTransactionList: String
+  canViewDetails: String
+  canExportList: String
+  canDoDueDateExtension: String
+}
+
+input CeReRoutedTabActionInput {
+  isAll: String
+  actions: CeReRoutedTabInput
+}
+
+# HISTORY TAB
+input CeHistoryTabInput {
+  canViewTransactionList: String
+  canViewDetails: String
+  canExportList: String
+  canDownloadTransactionReport: String
+}
+
+input CeHistoryTabActionInput {
+  isAll: String
+  actions: CeHistoryTabInput
+}
+
+input CeTransactionInput {
+  isAll: String
+  permissionLevel: String
+  pendingTab: CePendingTabActionInput
+  upcomingTab: CeUpcomingTabActionInput
+  hardCopyTab: CeHardCopyTabActionInput
+  reRoutedTab: CeReRoutedTabActionInput
+  historyTab: CeHistoryTabActionInput
+}
+
+# ADVISER TAB
+input AdviserTabInput {
+  canViewAdviserList: String
+  canViewDetails: String
+  canExportList: String
+}
+
+input AdviserTabActionInput {
+  isAll: String
+  actions: AdviserTabInput
+}
+
+input AdviserInput {
+  isAll: String
+  permissionLevel: String
+  advisersTab: AdviserBranchTabActionInput
+  investorsTab: InvestorTabActionInput
+}
+
+## HQ
+# USER MANAGEMENT
+input UserTabActionInput {
+  canViewUserList: String
+  canViewUserDetails: String
+  canExportList: String
+  canEditUserDetails: String
+  canCreateNewUser: String
+  canBulkImport: String
+  canSuspendUser: String
+  canReactivateUser: String
+  canTerminateUser: String
+}
+
+input UserTabReviewInput {
+  canApproveEditUserDetails: String
+  canApproveCreateNewUser: String
+  canApproveBulkImport: String
+  canApproveSuspendUser: String
+  canApproveReactivateUser: String
+  canApproveTerminateUser: String
+}
+
+input UserTabInput {
+  isAll: String
+  actions: UserTabActionInput
+  reviewApproval: UserTabReviewInput
+}
+
+input UserGroupTabActionInput {
+  canViewUserGroupList: String
+  canExportList: String
+  canCreateNewUserGroup: String
+  canEditUserGroup: String
+  canSuspendUserGroup: String
+  canReactivateUserGroup: String
+  canDeleteUserGroup: String
+}
+
+input UserGroupTabReviewInput {
+  canApproveCreateNewUserGroup: String
+  canApproveEditUserGroup: String
+  canApproveSuspendUserGroup: String
+  canApproveReactivateUserGroup: String
+  canApproveDeleteUserGroup: String
+}
+
+input UserGroupTabInput {
+  isAll: String
+  actions: UserGroupTabActionInput
+  reviewApproval: UserGroupTabReviewInput
+}
+
+input RolesPermissionTabActionInput {
+  canViewRolesList: String
+  canExportList: String
+  canCreateUserRole: String
+  canEditUserRoleDetails: String
+  canSuspendUserRole: String
+  canReactivateUserRole: String
+  canDeleteUserRole: String
+}
+
+input RolesPermissionTabReviewInput {
+  canApproveCreateUserRole: String
+  canApproveEditUserRole: String
+  canApproveSuspendUserRole: String
+  canApproveReactivateUserRole: String
+  canApproveDeleteUserRole: String
+}
+
+input RolesPermissionTabInput {
+  isAll: String
+  actions: RolesPermissionTabActionInput
+  reviewApproval: RolesPermissionTabReviewInput
+}
+
+input UserManagementInput {
+  isAll: String
+  permissionLevel: String
+  userTab: UserTabInput
+  userGroupTab: UserGroupTabInput
+  rolesPermissionTab: RolesPermissionTabInput
+}
+
+# ACTIVITY LOGS
+input UserActivityTabActionInput {
+  canViewUserActivityList: String
+  canViewActivityDetails: String
+  canExportList: String
+  canExportReport: String
+}
+
+input UserActivityTabInput {
+  isAll: String
+  actions: UserActivityTabActionInput
+}
+
+input ReportsTabActionInput {
+  canViewReportList: String
+  canExportList: String
+}
+
+input ReportsTabInput {
+  isAll: String
+  actions: ReportsTabActionInput
+}
+
+input ActivityLogsInput {
+  isAll: String
+  permissionLevel: String
+  userActivityTab: UserActivityTabInput
+  reportsTab: ReportsTabInput
+}
+
+# CE DASHBOARD
+input CeDueDateTabInput {
+  canViewDueDateExtensionList: String
+  canViewDetails: String
+  canExportList: String
+}
+
+input CeDueDateTabReviewInput {
+  canApproveDueDateExtension: String
+}
+
+input CeDueDateTabActionInput {
+  isAll: String
+  actions: CeDueDateTabInput
+  reviewApproval: CeDueDateTabReviewInput
+}
+
+input OverviewTabInput {
+  canViewOverview: String
+}
+
+input OverviewTabActionInput {
+  isAll: String
+  actions: OverviewTabInput
+}
+
+input CeDashboardInput {
+  isAll: String
+  permissionLevel: String
+  overview: OverviewTabActionInput
+  allBranch: AllBranchTabActionInput
+  pendingTab: CePendingTabActionInput
+  upcomingTab: CeUpcomingTabActionInput
+  hardCopyTab: CeHardCopyTabActionInput
+  reRoutedTab: CeReRoutedTabActionInput
+  historyTab: CeHistoryTabActionInput
+  dueDateTab: CeDueDateTabActionInput
+}
+
+# BRANCH OFFICES
+input AllBranchTabInput {
+  canViewAllBranchList: String
+  canExportList: String
+}
+
+input AllBranchTabActionInput {
+  isAll: String
+  actions: AllBranchTabInput
+}
+
+input PAllBranchTabActionInput {
+  isAll: String
+  actions: PBranchOfficeInput
+}
+
+input PBranchOfficeInput {
+  canViewAllBranchList: String
+  canViewAdvisersInvestors: String
+  canExportList: String
+}
+
+input AdviserBranchTabInput {
+  canViewAdviserList: String
+  canViewAdvisersProfile: String
+  canExportList: String
+}
+
+input AdviserBranchTabActionInput {
+  isAll: String
+  actions: AdviserBranchTabInput
+}
+
+input InvestorTabInput {
+  canViewInvestorsList: String
+}
+
+input InvestorTabActionInput {
+  isAll: String
+  actions: InvestorTabInput
+}
+
+input PBranchOfficesInput {
+  isAll: String
+  permissionLevel: String
+  allBranchTab: PAllBranchTabActionInput
+  advisersTab: AdviserBranchTabActionInput
+  investorsTab: InvestorTabActionInput
+}
+
+# EDD CASE
+input NewTabInput {
+  canViewNewCase: String
+  canViewDetails: String
+  canAddNewCase: String
+  canExportList: String
+  canDownloadMonthlyReport: String
+}
+
+input NewTabCaseInput {
+  canChangeResponse: String
+  canCancelCase: String
+}
+
+input NewTabActionInput {
+  isAll: String
+  actions: NewTabInput
+  caseActions: NewTabCaseInput
+}
+
+input EddReRoutedTabInput {
+  canViewReRoutedCasesList: String
+  canViewDetails: String
+  canExportList: String
+  canDownloadMonthlyReport: String
+}
+
+input EddReRoutedTabCaseInput {
+  canChangeResponse: String
+}
+
+input EddReRoutedTabActionInput {
+  isAll: String
+  actions: EddReRoutedTabInput
+  caseActions: EddReRoutedTabCaseInput
+}
+
+input ClosedTabInput {
+  canViewClosedCaseList: String
+  canViewDetails: String
+  canExportList: String
+  canDownloadMonthlyReport: String
+}
+
+input ClosedTabCaseInput {
+  canDownloadEddReport: String
+  canDownloadEddCommentsReport: String
+}
+
+input ClosedTabActionInput {
+  isAll: String
+  actions: ClosedTabInput
+  caseActions: ClosedTabCaseInput
+}
+
+input EddCaseInput {
+  isAll: String
+  permissionLevel: String
+  newTab: NewTabActionInput
+  reRoutedTab: EddReRoutedTabActionInput
+  closedTab: ClosedTabActionInput
+}
+
+# FINANCE DASHBOARD
+input FinanceTabInput {
+  canViewBranchVerifiedList: String
+  canViewDetails: String
+  canExportList: String
+  canReceivePayment: String
+  canReRouteTransaction: String
+}
+
+input FinanceTabActionInput {
+  isAll: String
+  actions: FinanceTabInput
+}
+
+input FinanceDashboardInput {
+  isAll: String
+  permissionLevel: String
+  overview: OverviewTabActionInput
+  branchVerifiedTab: FinanceTabActionInput
+  moneySightedFundTab: FinanceTabActionInput
+}
+
+# FINANCE CASES
+input FinanceCasesReRoutedTabInput {
+  canViewReRoutedList: String
+  canViewDetails: String
+  canExportList: String
+}
+
+input FinanceCasesReRoutedTabReviewInput {
+  canDoDueDateExtension: String
+}
+
+input FinanceCasesReRoutedTabActionInput {
+  isAll: String
+  actions: FinanceCasesReRoutedTabInput
+  reviewApproval: FinanceCasesReRoutedTabReviewInput
+}
+
+input FinanceHistoryTabInput {
+  canViewHistoryList: String
+  canViewDetails: String
+  canExportList: String
+}
+
+input FinanceHistoryTabActionInput {
+  isAll: String
+  actions: FinanceHistoryTabInput
+}
+
+input FinanceCasesInput {
+  isAll: String
+  permissionLevel: String
+  reRoutedTab: FinanceCasesReRoutedTabActionInput
+  historyTab: FinanceHistoryTabActionInput
+}
+
+# PRODUCT SETTINGS
+input AllFundsTabInput {
+  canViewFundList: String
+  canViewDetails: String
+  canExportList: String
+}
+
+input AllFundsTabActionInput {
+  isAll: String
+  actions: AllFundsTabInput
+}
+
+input AllAmpTabInput {
+  canViewAmpList: String
+  canViewDetails: String
+  canExportList: String
+}
+
+input AllAmpTabActionInput {
+  isAll: String
+  actions: AllAmpTabInput
+}
+
+input NavPerUnitTabInput {
+  canViewNavPerUnitList: String
+  canViewDetails: String
+  canExportList: String
+}
+
+input NavPerUnitTabActionInput {
+  isAll: String
+  actions: NavPerUnitTabInput
+}
+
+input DistributionTabInput {
+  canViewHistoryList: String
+  canViewDetails: String
+  canExportList: String
+}
+
+input DistributionTabActionInput {
+  isAll: String
+  actions: DistributionTabInput
+}
+
+input DocumentsTabInput {
+  canViewFundDocumentsList: String
+  canPreviewProspectus: String
+  canPreviewHighlight: String
+  canPreviewAnnual: String
+  canPreviewMonthly: String
+  canExportList: String
+}
+
+input DocumentsTabActionInput {
+  isAll: String
+  actions: DocumentsTabInput
+}
+
+input ProductSettingsInput {
+  isAll: String
+  permissionLevel: String
+  allFundsTab: AllFundsTabActionInput
+  allAmpTab: AllAmpTabActionInput
+  navPerUnitTab: NavPerUnitTabActionInput
+  distributionTab: DistributionTabActionInput
+  documentsTab: DocumentsTabActionInput
+}
+
+# UPLOADS
+input MasterFundTabInput {
+  canViewReRoutedList: String
+  canPreviewMasterFund: String
+  canExportList: String
+  canImportMasterFund: String
+}
+
+input MasterFundTabReviewInput {
+  canApproveMasterFund: String
+}
+
+input MasterFundTabActionInput {
+  isAll: String
+  actions: MasterFundTabInput
+  reviewApproval: MasterFundTabReviewInput
+}
+
+input UploadNavTabInput {
+  canViewRejectedList: String
+  canPreviewNav: String
+  canExportList: String
+  canImportNav: String
+}
+
+input UploadNavReviewInput {
+  canApproveNav: String
+}
+
+input UploadNavTabActionInput {
+  isAll: String
+  actions: UploadNavTabInput
+  reviewApproval: UploadNavReviewInput
+}
+
+input UploadDistributionTabInput {
+  canViewHistoryList: String
+  canPreviewDistribution: String
+  canExportList: String
+  canImportDistribution: String
+}
+
+input UploadDistributionReviewInput {
+  canApproveDistribution: String
+}
+
+input UploadDistributionTabActionInput {
+  isAll: String
+  actions: UploadDistributionTabInput
+  reviewApproval: UploadDistributionReviewInput
+}
+
+input UploadDocumentsTabInput {
+  canViewHistoryList: String
+  canViewDocuments: String
+  canExportList: String
+  canBulkUpload: String
+}
+
+input UploadDocumentsReviewInput {
+  canApproveBulkUpload: String
+}
+
+input UploadDocumentsTabActionInput {
+  isAll: String
+  actions: UploadDocumentsTabInput
+  reviewApproval: UploadDocumentsReviewInput
+}
+
+input UploadsInput {
+  isAll: String
+  permissionLevel: String
+  masterFundTab: MasterFundTabActionInput
+  navPerUnitTab: UploadNavTabActionInput
+  distributionTab: UploadDistributionTabActionInput
+  documentsTab: UploadDocumentsTabActionInput
+}
+
+# OPS DASHBOARD
+input OpsVerifiedTabInput {
+  canViewTransactionList: String
+  canViewDetails: String
+  canExportList: String
+  canReroute: String
+  canReject: String
+}
+
+input OpsVerifiedTabActionInput {
+  isAll: String
+  actions: OpsVerifiedTabInput
+}
+
+input FinanceReroutedTabInput {
+  canViewTransactionList: String
+  canViewDetails: String
+  canExportList: String
+  canFreezeTransaction: String
+  canUnFreezeTransaction: String
+}
+
+input FinanceReroutedTabActionInput {
+  isAll: String
+  actions: FinanceReroutedTabInput
+}
+
+input OperationDashboardInput {
+  isAll: String
+  permissionLevel: String
+  overview: OverviewTabActionInput
+  branchVerifiedTab: OpsVerifiedTabActionInput
+  moneySightedFundTab: OpsVerifiedTabActionInput
+  epfTab: OpsVerifiedTabActionInput
+  ddaTab: OpsVerifiedTabActionInput
+  financeReRoutedTab: FinanceReroutedTabActionInput
+}
+
+# OPS CASES
+input OpsReRoutedTabInput {
+  canViewReRoutedList: String
+  canViewDetails: String
+  canExportList: String
+}
+
+input OpsReRoutedTabReviewInput {
+  canApproveDueDateExtension: String
+}
+
+input OpsReRoutedTabActionInput {
+  isAll: String
+  actions: OpsReRoutedTabInput
+  reviewApproval: OpsReRoutedTabReviewInput
+}
+
+input OpsRejectedTabInput {
+  canViewRejectedList: String
+  canViewDetails: String
+  canExportList: String
+}
+
+input OpsRejectedTabActionInput {
+  isAll: String
+  actions: OpsRejectedTabInput
+}
+
+input OpsHistoryTabInput {
+  canViewHistoryList: String
+  canViewDetails: String
+  canExportList: String
+}
+
+input OpsHistoryTabActionInput {
+  isAll: String
+  actions: OpsHistoryTabInput
+}
+
+input OperationCasesInput {
+  isAll: String
+  permissionLevel: String
+  reRoutedTab: OpsReRoutedTabActionInput
+  rejectedTab: OpsRejectedTabActionInput
+  historyTab: OpsHistoryTabActionInput
+}
+
+input PermissionInput {
+  # SHARED
+  accountManagement: AccountManagementInput
+  # BRANCH
+  ceTransaction: CeTransactionInput
+  adviser: AdviserInput
+  # HQ
+  userManagement: UserManagementInput
+  activityLogs: ActivityLogsInput
+  ceDashboard: CeDashboardInput
+  branchOffices: PBranchOfficesInput
+  eddCase: EddCaseInput
+  financeDashboard: FinanceDashboardInput
+  financeCases: FinanceCasesInput
+  productSettings: ProductSettingsInput
+  uploads: UploadsInput
+  operationDashboard: OperationDashboardInput
+  operationCases: OperationCasesInput
+}
+
+input RoleInput {
+  roleName: String
+  description: String
+  grant: String
+  permission: PermissionInput
+}
+
+input EditRoleInput {
+  roleId: String
+  description: String
+  status: String
+  grant: String
+  permission: PermissionInput
+}
+
+input GroupInput {
+  groupName: String
+  description: String
+  roles: [Int]
+  branch: [Int]
+}
+
+input EditGroupInput {
+  groupId: String
+  description: String
+  status: String
+  roles: [String]
+  branch: [String]
+}
+
+# END PERMISSIONS
+
+input CaseStatusInput {
+  caseId: String!
+  action: String!
+  remarkId: String
+  amlaRemarks: [String]
+  cancelRemark: String
+}
+
+input NewCaseInput {
+  eddId: String!
+  targetDate: String!
+  cases: [NewCaseDetail!]!
+}
+input NewCaseDetail {
+  reasonId: String!
+  triggerId: String!
+  moduleId: String!
+  addQuestion: [String]
+  reasonRemark: String
+}
+
+input DownloadDailyInput {
+  transactionRef: [String!]!
+}
+type DownloadReportOutput {
+  data: DownloadReportResult
+  error: Error
+}
+type DownloadReportResult {
+  result: DownloadReportResponse
+}
+type DownloadReportResponse {
+  message: String
+  link: String
+}
+
+input populateEddInput {
+  orderNo: String
+}
+type populateEddOutput {
+  data: populateEddResult
+  error: Error
+}
+type populateEddResult {
+  result: populateEddResponse
+}
+type populateEddResponse {
+  orderNo: String
+  eddId: Int
+  accountType: String
+  client: [populateCommon]
+  agent: populateCommon
+  accountNo: String
+  message: String
+}
+type populateCommon {
+  uuid: String
+  hex: String
+  idNum: String
+  name: String
+  holderType: String
+  refId: String
+  omni: Int
+}
+
+input createTransactionsRefInput {
+  orderNo: String!
+}
+
+input TransactionStatusInput {
+  transactionRef: [String]
+  action: String
+  reasonId: [String]
+  remark: String
+  targetDate: String
+}
+
+type Query {
+  test(input: TestInput): CommonOutput
+  refreshJWT(input: RefreshJWTInput): RefreshJWT
+  amlaDashboard(input: DashboardInput): EddDashboard
+  branchDashboard(input: BranchDashboardInput): BranchDashboard
+  caseSelection(input: CaseSelectionInput): CaseSelection
+  caseDefinition(input: CaseDefinitionInput): CaseDefinition
+  questionSelection(input: QuestionSelectionInput): QuestionSelection
+  caseDetails(input: CaseDetailsInput): CaseDetails
+  eddReasonList(input: EddReasonListInput): ReasonOutput
+  inboxDashboard(input: InboxInput): GetInbox
+  adviserDashboard(input: AdviserDashboardInput): AdviserDashboard
+  getOrderSummary(input: OrderSummaryInput): OrderSummaryOutput
+  agentProfile(input: AgentProfileInput): SAAgentProfile
+  generateEddReport(input: generateEddReportInput): CommonOutput
+  generateEddReportMonthly(input: CaseIdInput): CommonOutput
+  adviserSummary(input: AdviserSummaryInput): AdviserSummaryOutput
+  branchOffices(input: BranchOfficesInput): BranchOffices
+  opsDashboard(input: DashboardInput): OpsDashboard
+  opsCasesDashboard(input: DashboardInput): OpsCasesDashboard
+  financeDashboard(input: DashboardInput): FinanceDashboard
+  financeCasesDashboard(input: DashboardInput): FinanceCasesDashboard
+  fundDataDashboard(input: DashboardInput): FundDataDashboard
+  systemAdminDashboard(input: DashboardInput): SystemAdminDashboard
+  systemAdminAdviserDashboard(input: DashboardInput): SystemAdminAdviserDashboard
+  activityLogDashboard(input: DashboardInput): ActivityLogDashboard
+  transactionReasonList(input: TransactionReasonListInput): TransactionReasonListOutput
+  hqCeDashboard(input: DashboardInput): HqCeDashboardOutput
+  fundSummary(input: FundSummaryInput): FundSummaryOutput
+  distributionHistory(input: DistributionHistoryInput): DistributionHistoryOutput
+  fundDocumentDashboard(input: DashboardInput): FundDocumentDashboard
+  fundUploadData(input: fundUploadDataInput): FundUploadDataOutput
+  dashboardExportList(input: DashboardExportInput): DashboardExportListOutput
+  systemAdminExport(input: ExportInput): DownloadReportOutput
+  getLogData(input: GetLogDataInput): GetLogDataOutput
+  transactionPdf(input: TransactionPdfInput): TransactionPdfOutput
+  getDropDownList: DropDownList
+  getIdInformation(input: IdInfoInput): IdInformation
+  userProfile: UserProfileOutput
+  transactionRequest(input: TransactionRequestInput): TransactionRequestOutput
+  dailySummaryCount(input: DailySummaryCountInput): DailySummaryCountOutput
+  fileCheck(input: FileCheckInput): FileCheckOutput
+  ppaDownload(input: TransactionRefArrayInput): DownloadReportOutput
+  systemAdminInboxData(input: SystemAdminInboxDataInput): SystemAdminInboxDataOutput
+  logOut: CommonOutput
+}
+
+input TransactionRefArrayInput {
+  transactionRef: [String]
+  tab: String
+}
+
+type FileCheckOutput {
+  data: FileCheckOutputResult
+  error: Error
+}
+
+type FileCheckOutputResult {
+  result: FileCheckOutputRes
+}
+
+type FileCheckOutputRes {
+  status: Boolean
+  message: String
+  fundData: [fundNameDetails]
+}
+
+type fundNameDetails {
+  fundAbbr: String
+  fundName: String
+}
+
+input FileCheckInput {
+  fileName: String
+  tab: String
+  fundAbbr: [String]
+}
+
+input VDropDownInput {
+  roles: [String]
+}
+
+type VDropDownOutput {
+  data: VDropDownOutputResult
+  error: Error
+}
+
+type VDropDownOutputResult {
+  result: VDropDownOutputRes
+}
+
+type VDropDownOutputRes {
+  roles: [String]
+}
+
+input DailySummaryCountInput {
+  branchId: String
+}
+
+type DailySummaryCountOutput {
+  data: DailySummaryCountOutputResult
+  error: Error
+}
+
+type DailySummaryCountOutputResult {
+  result: DailySummaryCountOutputRes
+}
+
+type DailySummaryCountOutputRes {
+  result: [String]
+  count: String
+}
+
+input TransactionRequestInput {
+  requestId: String
+}
+type TransactionRequestOutput {
+  data: TransactionRequestResult
+  error: Error
+}
+type TransactionRequestResult {
+  result: TransactionRequestRes
+}
+type TransactionRequestRes {
+  requestId: Int
+  requestorName: String
+  reasons: [ReasonList]
+  eventType: String
+  approval: ApprovalResponse
+  targetDate: String
+}
+
+input TransactionPdfInput {
+  transactionId: String
+  tab: String
+}
+
+type TransactionPdfOutput {
+  data: TransactionPdfOutputResult
+  error: Error
+}
+type TransactionPdfOutputResult {
+  result: TransactionPdfOutputResponse
+}
+type TransactionPdfOutputResponse {
+  message: String
+  status: Boolean
+  path: String
+}
+
+type GetLogDataOutput {
+  data: GetLogDataOutputResult
+  error: Error
+}
+
+type GetLogDataOutputResult {
+  result: GetLogDataOutputResponse
+}
+
+type GetLogDataOutputResponse {
+  message: String
+  status: Boolean
+  data: GetLogData
+}
+
+type GetLogData {
+  code: String
+  operationName: String
+  fileSize: String
+  roles: String
+  createdOn: String
+  name: String
+  eventType: String
+  operationStatus: String
+  data: String
+  type: String
+  timestamp: String
+  remark: String
+  status: String
+  fundData: String
+}
+
+input GetLogDataInput {
+  id: Int
+}
+
+input SystemAdminInboxDataInput {
+  id: Int
+}
+type SystemAdminInboxDataOutput {
+  data: SystemAdminInboxDataOutputResult
+  error: Error
+}
+type SystemAdminInboxDataOutputResult {
+  result: GetInboxOutputResponse
+}
+type GetInboxOutputResponse {
+  message: String
+  status: Boolean
+  data: SystemAdminInboxData
+}
+type SystemAdminInboxData {
+  value: String
+  authorName: String
+  approverName: String
+  approvalStatus: String
+  source: String
+  type: String
+  createdOn: String
+  remarks: String
+  fundData: String
+}
+
+type UserProfileOutput {
+  data: UserProfileResult
+  error: Error
+}
+type UserProfileResult {
+  result: UserProfileRes
+}
+type UserProfileRes {
+  name: String
+  status: String
+  homeBranch: String
+  department: String
+  email: String
+  mobileNo: String
+}
+
+input IdInfoInput {
+  id: String
+  viewType: String
+}
+
+type IdInformation {
+  data: IdInformationResponse
+  error: Error
+}
+
+type IdInformationResponse {
+  result: IdInformationResult
+}
+
+type IdInformationResult {
+  info: String
+}
+
+input DashboardExportInput {
+  endpoint: String
+  branchId: String
+  tab: String
+  search: CustomResultInput
+  filter: [CustomResultInput]
+  sort: [CustomResultInput]
+}
+type DashboardExportListOutput {
+  data: DashboardExportListResult
+  error: Error
+}
+type DashboardExportListResult {
+  result: DashboardExportListRes
+}
+type DashboardExportListRes {
+  # general
+  adviserdashboard: [Adviser]
+  branchoffices: [Branch]
+
+  # ce
+  branchdashboard: [Transactions]
+  hqcedashboardBranch: [Branch]
+  hqcedashboardExtension: [Transactions]
+
+  # system admin
+  systemadmindashboard: [SystemAdminDashboardData]
+  activitylogdashboard: [ActivityLog]
+  systemadminadviserdashboard: [SADashboardData]
+
+  # fund data
+  funddatadashboard: [FundData]
+  funddocumentdashboard: [FundDocument]
+}
+
+input ExportInput {
+  toExport: String
+}
+
+type ActivityLogDashboard {
+  data: ActivityLogDashboardResult
+  error: Error
+}
+type ActivityLogDashboardResult {
+  result: ActivityLogDashboardResponse
+}
+type ActivityLogDashboardResponse {
+  logs: [ActivityLog]
+  page: Int
+  pages: Int
+  activityCount: Int
+  reportCount: Int
+}
+type ActivityLog {
+  id: String
+  operationName: String
+  name: String
+  code: String
+  roles: [String]
+  eventType: String
+  createdOn: String
+  status: String
+  action: String
+  fileSize: String
+  userName: String
+}
+
+input AgentProfileInput {
+  userId: String
+}
+
+type SAAgentProfile {
+  data: SAgentProfileResult
+  error: Error
+}
+
+type SAgentProfileResult {
+  result: SAgentProfile
+}
+
+type SAgentProfile {
+  userId: String
+  nric: String
+  name: String
+  status: String
+  personalDetails: SAPersonalDetails
+  contactDetails: SAContactDetails
+  addressInfo: SAAddressInfo
+}
+
+type SAPersonalDetails {
+  licenseCode: String
+  homeBranch: String
+  omniEnabled: String
+  bdmName: String
+  bdmCode: String
+  bdmEmail: String
+  uplineName: String
+  uplineCode: String
+  region: String
+  adviserChannel: String
+  adviserRank: String
+  agency: String
+}
+
+type SAContactDetails {
+  email: String
+  mobileNo: String
+}
+
+type SAAddressInfo {
+  address: String
+  postcode: String
+  addrTown: String
+  state: String
+  country: String
+}
+
+type DropDownList {
+  data: DropDownListResult
+  error: Error
+}
+
+type DropDownListOutput {
+  id: String
+  value: String
+}
+
+type DropDownListRes {
+  departments: [DropDownListOutput]
+  accessLevel: [DropDownListOutput]
+  branches: [DropDownListOutput]
+  groups: [DropDownListOutput]
+  roles: [DropDownListOutput]
+  agency: [DropDownListOutput]
+  channel: [DropDownListOutput]
+  eventTypes: [String]
+}
+
+type DropDownListResult {
+  result: DropDownListRes
+}
+
+input fundUploadDataInput {
+  fundDocumentId: Int
+}
+
+type FundUploadDataOutput {
+  data: FundUploadDataOutputResult
+  error: Error
+}
+
+type FundUploadDataOutputResult {
+  result: FundUploadDataOutputResponse
+}
+
+type FundUploadDataOutputResponse {
+  message: String
+  data: String
+  user: String
+  transaction: fundTransaction
+}
+
+type fundTransaction {
+  status: String
+  user: String
+  remark: String
+}
+
+type FundDocumentDashboard {
+  data: FundDocumentDashboardResult
+  error: Error
+}
+type FundDocumentDashboardResult {
+  result: FundDocumentDashboardResponse
+}
+type FundDocumentDashboardResponse {
+  transactions: [FundDocument]
+  page: Int
+  pages: Int
+  filters: uploadFilters
+}
+
+type uploadFilters {
+  status: [String]
+}
+
+type FundDocument {
+  fileName: String!
+  lastUpdate: String
+  status: String!
+  fileSize: String
+  remark: String
+  fileType: String
+  uploadedOn: String!
+  totalDocuments: Int
+  fundDocumentId: Int
+  isSeen: Boolean
+}
+
+input DistributionHistoryInput {
+  fundId: Int
+  dateFrom: String
+  dateTo: String
+  fundClass: String
+  tab: String
+}
+
+type DistributionHistoryOutput {
+  data: DistributionHistoryResult
+  error: Error
+}
+type DistributionHistoryResult {
+  result: DistributionHistoryResponse
+}
+
+type DistributionHistoryResponse {
+  message: String
+  status: Boolean
+  result: [resultArray]
+  fundClass: [String]
+}
+type resultArray {
+  fundCurrency: String
+  latestNavPerUnit: String
+  navChange: String
+  navChangePercentage: String
+  netDistribution: String
+  netChange: String
+  netChangePercentage: String
+  grossDistribution: String
+  grossChange: String
+  grossChangePercentage: String
+  unitSplit: String
+  latestNavDate: String
+  change: String
+  changePercentage: String
+  closingDate: String
+}
+
+input FundSummaryInput {
+  fundId: Int!
+  tab: String!
+}
+type FundSummaryOutput {
+  data: FundSummaryResult
+  error: Error
+}
+type FundSummaryResult {
+  result: FundSummaryResponse
+}
+type FundSummaryResponse {
+  fundName: String
+  utmc: String
+  fundSummary: fundSummary
+  investmentSummary: investmentSummary
+  feesSummary: feesSummary
+  epfSummary: epfSummary
+  redemptionSummary: redemptionSummary
+  switchingSummary: switchingSummary
+  salesSummary: salesSummary
+  topUpSummary: topUpSummary
+  transferSummary: transferSummary
+  description: String
+  filters: summaryFilter
+}
+
+type summaryFilter {
+  fundClass: [String]
+}
+
+type redemptionSummary {
+  redemptionType: String
+  minRedemptionUnits: String
+  redemptionSettleDate: String
+  redemption: Boolean
+  redemptionCoolOff: Boolean
+  redemptionCutOffTime: String
+  batchCutOffTime: String
+}
+type switchingSummary {
+  switchingType: String
+  switchingFee: String
+  transactionsAfterIopSwitchIn: Boolean
+  transactionsAfterIopSwitchOut: Boolean
+  minSwitchOutUnits: String
+  switchingSettlementDate: String
+  switchingGroup: String
+  minSalesAmountEpf: String
+  minSalesAmountNonEpf: String
+  minTopUpEpf: String
+  minTopUpNonEpf: String
+}
+type salesSummary {
+  transactionsAfterIopNewSales: Boolean
+  minNewSalesAmount: String
+  maxNewSalesAmount: String
+  minBalanceHoldingUnits: String
+  salesCutOffTime: String
+  batchCutOffTime: String
+}
+type topUpSummary {
+  transactionsAfterIopTopUpSales: Boolean
+  minTopUpAmount: String
+  maxTopUpAmount: String
+}
+type transferSummary {
+  transactionsAfterIopTransfer: Boolean
+  minTransferOutUnits: String
+  transferFee: String
+}
+type feesSummary {
+  issuePrice: String
+  annualManagementFee: String
+  annualTrusteeFee: String
+  ampFee: String
+  minSalesFees: String
+  maxSalesFees: String
+  exitFeesCharge: String
+  exitFeesChargeAmount: String
+  gstParameter: Int
+}
+type epfSummary {
+  epfApproved: Boolean
+  epfStatus: String
+  minSalesFee: String
+  maxSalesFee: String
+  maxNewSalesAmountEpf: String
+  minNewSalesAmountEpf: String
+  minTopupAmountEpf: String
+  exitFeesCharge: String
+  exitFeesChargeAmount: String
+  maxTopupAmountEpf: String
+}
+type investmentSummary {
+  instruction: String
+  dividentTiming: String
+  minimumDividentPayoutAmount: String
+  dailyIncomeDistribution: Boolean
+  fundBaseCurrency: String
+  fundClassCurrency: String
+  isAipAllowed: Boolean
+  coolOffDays: Int
+  moneySightedFund: Boolean
+  dedicatedFund: Boolean
+  differenceFundPrice: String
+  salesSettlementDay: String
+}
+type fundSummary {
+  nonBusinessDayFrom: String
+  nonBusinessDayTo: String
+  fundCode: String
+  fundCategory: String
+  fundProcessingGroup: String
+  fundDescription: String
+  fundType: String
+  isSyariah: Boolean
+  fundClass: String
+  trustee: String
+  scProcessingGroup: String
+  fundStartDate: Int
+  iopEndDate: Int
+  maturityDate: String
+  commercialStartDate: String
+  lipperCode: String
+  felSharing: String
+  ageGroup: String
+  riskCategory: String
+  closedEnd: Boolean
+  transactionsAfterIopAllow: Boolean
+  minimumBalanceHoldingUnits: String
+  distributedBy: String
+  isFea: Boolean
+  landingFund: String
+}
+
+type HqCeDashboardOutput {
+  data: HqCeDashboardResult
+  error: Error
+}
+type HqCeDashboardResult {
+  result: HqCeDashboard
+}
+type HqCeDashboard {
+  overview: HQOverview
+  totalResultCount: Int
+  page: Int
+  pages: Int
+
+  # tab: branch
+  branches: [Branch]
+  stateList: [String]
+  branchCount: Int
+
+  # tab: extension
+  transactions: [Transactions]
+  extensionCount: Int
+}
+type HQOverview {
+  daily: Int
+  reroute: Int
+  extension: Int
+  hardcopy: Int
+}
+
+input TransactionReasonListInput {
+  source: String
+  actionType: String
+  transactionType: String
+  salesType: String
+  transactionRef: String
+}
+type TransactionReasonListOutput {
+  data: TransactionReasonListResult
+  error: Error
+}
+type TransactionReasonListResult {
+  result: TransactionReasonList
+}
+type TransactionReasonList {
+  reasons: [ReasonList]
+  targetDate: String
+}
+
+type OpsCasesDashboard {
+  data: OpsCasesDashboardResponse
+  error: Error
+}
+type OpsCasesDashboardResponse {
+  result: OpsCasesDashboardResult
+}
+type OpsCasesDashboardResult {
+  transactions: [Transactions]
+  totalResultCount: Int
+  rerouteCount: Int
+  rejectCount: Int
+  historyCount: Int
+  pages: Int
+  page: Int
+}
+
+type OpsDashboard {
+  data: OpsDashboardResponse
+  error: Error
+}
+type OpsDashboardResponse {
+  result: OpsDashboardResult
+}
+type OpsDashboardResult {
+  transactions: [Transactions]
+  branchCount: [Int]
+  totalResultCount: Int
+  verifiedCount: Int
+  sightedCount: Int
+  epfCount: Int
+  ddaCount: Int
+  financeCount: Int
+  pages: Int
+  page: Int
+}
+
+input generateEddReportInput {
+  caseId: String!
+  withComments: Boolean!
+}
+
+input CaseIdInput {
+  caseId: String!
+}
+
+input BranchOfficesInput {
+  page: String
+  resultLimit: String
+  search: CustomResultInput
+  filter: [CustomResultInput]
+  sort: [CustomResultInput]
+}
+type BranchOffices {
+  data: BranchOfficesResults
+  error: Error
+}
+type BranchOfficesResults {
+  result: BranchOfficesResponse
+}
+type BranchOfficesResponse {
+  branches: [Branch]
+  stateList: [String]
+  totalResultCount: Int
+  branchCount: Int
+  page: Int
+  pages: Int
+}
+type Branch {
+  branchId: String
+  name: String
+  code: String
+  state: String
+
+  # BranchOffices
+  agentCount: Int
+  clientCount: Int
+
+  # HqCeDashboard Branch
+  dailyCount: Int
+  rerouteCount: Int
+  hardcopyCount: Int
+}
+
+input AdviserSummaryInput {
+  tab: String!
+  agentId: String!
+  page: String
+  resultLimit: String
+  search: CustomResultInput
+  sort: [CustomResultInput]
+  filter: [CustomResultInput]
+}
+type AdviserSummaryOutput {
+  data: AdviserSummaryResults
+  error: Error
+}
+type AdviserSummaryResults {
+  result: AdviserSummary
+}
+type AdviserSummary {
+  profile: AgentProfileDetailed
+  investor: [InvestorDetail]
+  totalResultCount: Int
+  investorCount: Int
+  typeCount: [Int]
+  page: Int
+  pages: Int
+}
+type AgentProfileDetailed {
+  name: String
+  code: String
+  nric: String
+  personalDetails: AgentPersonalDetails
+  contactDetails: AgentContactDetails
+  addressInfo: AgentAddressInfo
+}
+type AgentPersonalDetails {
+  licenseCode: String
+  homeBranch: String
+  omniEnabled: String
+  bdmName: String
+  bdmCode: String
+  bdmEmail: String
+  uplineName: String
+  uplineCode: String
+  region: String
+  adviserChannel: String
+  adviserRank: String
+  agency: String
+}
+type AgentContactDetails {
+  email: String
+  mobileNo: String
+}
+type AgentAddressInfo {
+  address: String
+  postcode: String
+  addrTown: String
+  state: String
+  country: String
+}
+type InvestorDetail {
+  clientId: String
+  clientName: String
+  clientIdNum: String
+  riskCategory: String
+  individualCount: Int
+  principalCount: Int
+  jointholderCount: Int
+  totalAccount: Int
+  lastUpdated: String
+  lastActivity: String
+}
+type AgentProfile {
+  agentId: String
+  nric: String
+  portfolioType: String
+  licenceCode: String
+  email: String
+  address: String
+  addrTown: String
+  mobileNo: String
+  licenseNo: String
+  status: String
+  timestamp: String
+}
+
+input OrderSummaryInput {
+  requestId: String
+  transactionRef: String
+  orderNumber: String
+  endpoint: String
+  tab: String
+}
+type OrderSummaryOutput {
+  data: OrderSummaryResult
+  error: Error
+}
+type OrderSummaryResult {
+  result: OrderSummaryRes
+}
+type OrderSummaryRes {
+  requestId: Int
+  requestorName: String
+  approval: ApprovalResponse
+  status: String
+  orderNo: String
+  transactionRef: String
+  remarks: [StatusRemark]
+  extensionRemarks: ExtensionRemarks
+  totalInvestment: [TotalInvestment]
+  transactionDetails: TxDetails
+  investmentSummary: [InvestmentSummary]
+  paymentSummary: [PaymentSummary]
+  profile: [ClientProfile]
+}
+type ApprovalResponse {
+  name: String
+  status: String
+  remarks: String
+  eventType: String
+}
+type ExtensionRemarks {
+  date: String
+  remarks: String
+}
+type TxDetails {
+  registrationDate: String
+  servicingAdviserName: String
+  servicingAdviserCode: String
+  kibProcessingBranch: String
+  accountType: String
+  accountNo: String
+  accountOperationMode: String
+}
+type InvestmentSummary {
+  fundName: String
+  utmc: String
+  fundCurrency: String
+  investmentAmount: String
+  fundCode: String
+  fundClass: String
+  salesCharge: String
+  accountFund: String
+  productType: String
+  investmentType: String
+  feaTagged: String
+  distributionInstructions: String
+  recurring: String
+}
+type PaymentSummary {
+  fundCurrency: String
+  investmentAmount: String
+  paymentMethod: String
+  paymentOn: String
+  remark: String
+  proofOfPayment: FileBase64
+  referenceNumber: String
+  # cash
+  kibBankName: String
+  kibBankAccountNumber: String
+  bankName: String
+  checkNumber: String
+  clientName: String
+  clientTrustAccountNumber: String
+  # epf
+  epfReferenceNo: String
+  epfAccountNumber: String
+  # dda/fpx
+  bankAccountName: String
+  bankAccountNumber: String
+  recurringType: String
+  recurringBank: String
+  frequency: String
+}
+type ClientProfile {
+  name: String
+  idNumber: String
+  idType: String
+  idFile: String
+  personalDetails: ClientDetails
+  epfDetails: EpfDetails
+  employmentInformation: EmploymentDetails
+  contactDetails: ContactDetails
+  addressInformation: AddressInformation
+  bankInformation: BankTypes
+  fatcaDeclaration: FatcaDeclaration
+  crsDeclaration: CrsDeclaration
+  feaDeclaration: FeaDeclaration
+}
+type AddressInformation {
+  permanentAddress: AddressDetails
+  mailingAddress: AddressDetails
+}
+type ContactDetails {
+  officeNumber: String
+  homeNumber: String
+  mobileNumber: String
+  faxNumber: String
+  email: String
+}
+type ClientDetails {
+  dateOfBirth: String
+  salutation: String
+  gender: String
+  nationality: String
+  race: String
+  bumiputera: String
+  placeOfBirth: String
+  riskProfile: String
+  countryOfBirth: String
+  educationLevel: String
+  mothersMaidenName: String
+  maritalStatus: String
+  relationship: String
+  monthlyHouseholdIncome: String
+}
+type EpfDetails {
+  epfMemberNumber: String
+  epfAccountType: String
+}
+type EmploymentDetails {
+  annualIncome: String
+  nameOfEmployer: String
+  natureOfBusiness: String
+  occupation: String
+  address: AddressDetails
+}
+type AddressDetails {
+  address: SubAddress
+  city: String
+  country: String
+  postCode: String
+  state: String
+}
+type SubAddress {
+  line1: String
+  line2: String
+  line3: String
+}
+type BankTypes {
+  localBank: [BankDetails]
+  foreignBank: [BankDetails]
+}
+type BankDetails {
+  bankAccountName: String
+  bankAccountNumber: String
+  bankName: String
+  bankSwiftCode: String
+  bankLocation: String
+  currency: [String]
+}
+type FatcaDeclaration {
+  usCitizen: String
+  usBorn: String
+  confirmAddress: String
+  certificate: FileBase64
+  formW9: FileBase64
+  formW8Ben: FileBase64
+  reason: String
+  correspondenceDeclaration: String
+}
+type CrsDeclaration {
+  taxResident: String
+  tin: [TinInfo]
+}
+type TinInfo {
+  country: String
+  tinNumber: String
+  reason: String
+}
+type FeaDeclaration {
+  resident: String
+  borrowingFacility: String
+  balance: String
+}
+
+input AdviserDashboardInput {
+  branchId: String
+  page: String
+  resultLimit: String
+  search: CustomResultInput
+  filter: [CustomResultInput]
+  sort: [CustomResultInput]
+}
+type AdviserDashboard {
+  data: AdviserDashboardResults
+  error: Error
+}
+type AdviserDashboardResults {
+  result: AdviserDashboardResponse
+}
+type AdviserDashboardResponse {
+  advisers: [Adviser]
+  adviserCount: Int
+  page: Int
+  pages: Int
+}
+type Adviser {
+  agentId: String
+  agentName: String
+  agentCode: String
+  bdmName: String
+  bdmCode: String
+  uplineName: String
+  uplineCode: String
+  status: String
+  createdOn: String
+  lastUpdated: String
+}
+
+input InboxInput {
+  page: String!
+  resultLimit: String!
+  search: String
+  source: [String]
+}
+type GetInbox {
+  data: InboxResult
+  error: Error
+}
+type InboxResult {
+  result: InboxResponse
+}
+type InboxResponse {
+  inbox: [InboxMessage]
+  newMessageCount: String
+  page: String
+  pages: String
+}
+type InboxMessage {
+  notificationId: Int
+  title: String
+  message: String
+  senderName: String
+  source: String
+  searchKey: String
+  searchType: String
+  searchLink: String
+  searchId: String
+  isRead: Boolean
+  updatedAt: String
+  createdOn: String
+  isSeen: Boolean
+}
+
+input EddReasonListInput {
+  actionType: String!
+}
+type ReasonOutput {
+  data: ReasonResults
+  error: Error
+}
+type ReasonResults {
+  result: ReasonResponse
+}
+type ReasonResponse {
+  reasons: [ReasonList]
+  targetDate: String
+}
+
+input CaseDetailsInput {
+  caseId: String!
+}
+type CaseDetails {
+  data: CaseDetailsResult
+  error: Error
+}
+type CaseDetailsResult {
+  result: [CaseDescription]
+}
+type CaseDescription {
+  id: String
+  allQuestions: [QuestionAnswer]
+  conclusionQuestions: [QuestionAnswer]
+  createdOn: String
+}
+type QuestionAnswer {
+  question: String!
+  instructions: String
+  options: [String]
+  answer: String
+  amlaRemark: String
+  documents: [FileBase64]
+}
+
+input QuestionSelectionInput {
+  reasonId: String!
+  moduleSelected: String
+}
+type QuestionSelection {
+  data: QuestionSelectionResult
+  error: Error
+}
+type QuestionSelectionResult {
+  result: QuestionSelectionResponse
+}
+type QuestionSelectionResponse {
+  moduleList: [Int]
+  moduleSelected: Int
+  module: [Question]
+  conclusion: [Question]
+}
+type Question {
+  question: String
+  instructions: String
+  options: [String]
+  multiSelection: Int
+}
+
+input CaseDefinitionInput {
+  eddId: String!
+}
+type CaseDefinition {
+  data: CaseDefinitionResponse
+  error: Error
+}
+type CaseDefinitionResponse {
+  result: CaseDefinitionResults
+}
+type CaseDefinitionResults {
+  targetDate: String
+  clients: [ClientCaseDetails]
+  accountDetails: Account
+  eddTrigger: [ReasonList]
+  eddReason: [ReasonList]
+}
+type Account {
+  accountNo: String
+  accountCreated: String
+  agentName: String
+  agentCode: String
+  fundType: String
+  paymentMethod: String
+}
+type ReasonList {
+  reasonId: String
+  category: String
+  subCategory: [[String]]
+}
+type ClientCaseDetails {
+  nationality: String
+  email: String
+  mobileNumber: String
+  occupation: String
+  nameOfEmployer: String
+  annualIncome: String
+  type: String
+}
+
+input CaseSelectionInput {
+  page: String!
+  resultLimit: String!
+  search: CustomResultInput
+  sort: [CustomResultInput]
+}
+type CaseSelection {
+  data: CaseSelectionResult
+  error: Error
+}
+type CaseSelectionResult {
+  result: CaseSelectionResponse
+}
+type CaseSelectionResponse {
+  investors: [InvestorCase]
+  totalResultCount: Int
+  investorCount: Int
+  page: Int
+  pages: Int
+}
+type InvestorCase {
+  eddId: Int
+  accountNo: String
+  accountCreated: String
+  accountType: String
+  clientName: String
+  clientIdNum: String
+  agentName: String
+  agentCode: String
+  agentOrigin: String
+  lastCase: String
+  lastStatus: String
+  lastClosed: Int
+}
+
+input DashboardInput {
+  tab: String
+  page: String
+  resultLimit: String
+  search: CustomResultInput
+  filter: [CustomResultInput]
+  sort: [CustomResultInput]
+}
+input CustomResultInput {
+  column: String
+  value: String
+}
+
+input BranchDashboardInput {
+  tab: String
+  page: String
+  resultLimit: String
+  search: CustomResultInput
+  filter: [CustomResultInput]
+  sort: [CustomResultInput]
+  branchId: String
+}
+type BranchDashboard {
+  data: BranchDashboardResult
+  error: Error
+}
+type BranchDashboardResult {
+  result: BranchDashboardResponse
+}
+type BranchDashboardResponse {
+  transactions: [Transactions]
+  dailyCount: Int
+  typeCount: [Int]
+  typeSeen: [Boolean]
+  cutOffCount: [Int]
+  batchCount: [BatchCountList]
+  totalResultCount: Int
+  upcomingCount: Int
+  hardcopyCount: Int
+  rerouteCount: Int
+  historyCount: Int
+  page: Int
+  pages: Int
+}
+type BatchCountList {
+  batchTime: String
+  count: Int
+}
+
+type Transactions {
+  requestId: Int
+  lastUpdated: String
+  submittedOn: String
+  createdOn: String
+  orderNo: String
+  transactionRef: String
+  accountType: String
+  clientName: String
+  clientIdNum: String
+  transactionType: String
+  fundType: String
+  paymentMethod: String
+  fundCategory: String
+  totalInvestment: [TotalInvestment]
+  agentName: String
+  agentCode: String
+  status: String
+  remarks: [StatusRemark]
+  cutOffTime: String
+  batchTime: String
+  targetDate: String
+  aging: String
+  approvalType: String
+  utmc: String
+  isSeen: Boolean
+
+  # hqCeDashboard - extension
+  branchName: String
+  extendTargetDate: String
+  extendRemarks: [StatusRemark]
+  requestedBy: String
+}
+
+type TotalInvestment {
+  fundCurrency: String
+  investmentAmount: String
+}
+
+type StatusRemark {
+  title: String
+  content: [String]
+}
+
+type FinanceDashboard {
+  data: FinanceDashboardResult
+  error: Error
+}
+type FinanceDashboardResult {
+  result: FinanceDashboardResponse
+}
+type FinanceDashboardResponse {
+  transactions: [Finance]
+  branchVerifiedCount: Int
+  totalResultCount: Int
+  branchCount: [Int]
+  page: Int
+  pages: Int
+  moneyMarketFundCount: Int
+}
+type Finance {
+  clientName: String
+  clientIdNum: String
+  lastUpdated: String
+  transactionType: String
+  transactionRef: String
+  agentCode: String
+  accountNo: String
+  agentName: String
+  fundType: String
+  totalInvestment: String
+  status: String
+}
+
+type FinanceCasesDashboard {
+  data: FinanceCasesDashboardResult
+  error: Error
+}
+type FinanceCasesDashboardResult {
+  result: FinanceCasesDashboardResponse
+}
+type FinanceCasesDashboardResponse {
+  transactions: [FinanceCases]
+  page: Int
+  pages: Int
+  branchCount: Int
+  moneyMarketFundCount: Int
+}
+type FinanceCases {
+  clientName: String
+  clientIdNum: String
+  lastUpdated: String
+  transactionType: String
+  transactionRef: String
+  agentCode: String
+  accountNo: String
+  agentName: String
+  fundType: String
+  totalInvestment: String
+  status: String
+  remarks: String
+}
+
+type SystemAdminAdviserDashboard {
+  data: SAAdviserDashboardResult
+  error: Error
+}
+
+type SAAdviserDashboardResult {
+  result: SAAdviserDashboardResponse
+}
+
+type SAAdviserDashboardResponse {
+  advisers: [SADashboardData]
+  page: Int
+  pages: Int
+  adviserCount: Int
+}
+
+type SADashboardData {
+  branch: String
+  advisers: [SADashboardDataResult]
+}
+
+type SADashboardDataResult {
+  agentId: String
+  agentName: String
+  bdmName: String
+  bdmCode: String
+  channel: String
+  agency: String
+  licenseCode: String
+  createdOn: String
+  status: String
+  omniEnabled: String
+  agentCode: String
+}
+
+type SystemAdminDashboard {
+  data: SystemAdminDashboardResult
+  error: Error
+}
+
+type SystemAdminDashboardResult {
+  result: SystemAdminDashboardResponse
+}
+
+type SystemAdminDashboardResponse {
+  transactions: [SystemAdminDashboardData]
+  overview: SystemAdminOverview
+  page: Int
+  pages: Int
+  bulkId: [String]
+  totalUserCount: Int
+  totalGroupCount: Int
+  totalRoleCount: Int
+  groupCount: Int
+  roleCount: Int
+}
+
+type SystemAdminOverview {
+  totalSuspendedUsers: Int
+  totalActiveUsers: Int
+  totalActiveGroups: Int
+  totalActiveRoles: Int
+  totalEditUserRequest: Int
+  totalBulkImportRequest: Int
+  totalCreatedUserRequest: Int
+  totalSuspendedUserRequest: Int
+  totalReactivateUserRequest: Int
+  totalTerminateUserRequest: Int
+  totalGroupRequest: Int
+  totalEditGroupRequest: Int
+  totalSuspendedGroupRequest: Int
+  totalReactivateGroupRequest: Int
+  totalDeleteGroupRequest: Int
+  totalRoleRequest: Int
+  totalEditRoleRequest: Int
+  totalSuspendedRoleRequest: Int
+  totalReactivateRoleRequest: Int
+  totalDeleteRoleRequest: Int
+}
+
+type SystemAdminDashboardData {
+  # USER TAB
+  staffName: String
+  userId: String
+  loginId: String
+  department: String
+  userGroup: [String]
+  lastLogin: String
+  # GROUP TAB
+  groupId: String
+  groupName: String
+  branch: [String]
+  userCount: String
+  roleCount: String
+  # ROLE TAB
+  roleId: String
+  roleName: String
+  description: String
+  accessLevel: String
+  # GENERIC
+  requestId: String
+  timestamp: String
+  status: String
+  source: String
+  isSeen: Boolean
+  lastUpdated: String
+  action: String
+}
+
+type FundDataDashboard {
+  data: FundDataDashboardResult
+  error: Error
+}
+type FundDataDashboardResult {
+  result: FundDataDashboardResponse
+}
+type FundDataDashboardResponse {
+  transactions: [FundData]
+  page: Int
+  pages: Int
+  allFundsCount: Int
+  ampFundCount: Int
+  filters: fundFilters
+}
+
+type fundFilters {
+  fundCategory: [String]
+  fundType: [String]
+  issuingHouse: [String]
+  fundClass: [String]
+  fundCurrency: [String]
+  fundStatus: [String]
+  riskCategory: [String]
+}
+
+type FundData {
+  fundAbbr: String
+  fundId: Int
+  fundName: String
+  fundClass: String
+  fundCurrency: String
+  lastUpdated: String
+  fundType: String
+  fundCategory: String
+  fundStatus: String
+  isSyariah: Int
+  latestNavPerUnit: String
+  previousNavPerUnit: String
+  latestNavDate: String
+  previousNavDate: String
+  grossDistribution: String
+  netDistribution: String
+  unitSplit: String
+  document: [docArray]
+  riskCategory: String
+  latestGrossDate: String
+  latestNetDate: String
+  timestamp: String
+  issuingHouse: String
+  closingDate: String
+  unitClosingDate: String
+  startDate: String
+}
+
+type docArray {
+  name: String
+  url: String
+  documentType: String
+}
+
+type EddDashboard {
+  data: EddDashboardResult
+  error: Error
+}
+type EddDashboardResult {
+  result: EddDashboardResponse
+}
+type EddDashboardResponse {
+  cases: [Case]
+  newCount: Int
+  rerouteCount: Int
+  historyCount: Int
+  page: Int
+  pages: Int
+}
+type Case {
+  caseId: Int
+  caseNo: String
+  accountType: String
+  clientIdNum: String
+  clientName: String
+  accountNo: String
+  agentName: String
+  agentCode: String
+  bdmName: String
+  bdmCode: String
+  status: String
+  targetCloseDate: String
+  caseCreated: String
+}
+
+input RefreshJWTInput {
+  refreshToken: String!
+}
+type RefreshJWT {
+  data: JWTResult
+  error: Error
+}
+
+type FileBase64 {
+  url: String
+  base64: String
+  date: String
+  name: String
+  path: String
+  size: Float
+  type: String
+}

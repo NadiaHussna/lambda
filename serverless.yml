@@ -1,0 +1,423 @@
+service:
+  name: BackOfficeWeb
+provider:
+  name: aws
+  region: ap-southeast-1
+  stages: local
+plugins:
+  - serverless-appsync-plugin
+  - serverless-appsync-offline
+functions:
+  BackOfficeWeb:
+    handler: build/index.handler
+    package:
+      include:
+        - '!**'
+        - build/**
+custom:
+  appSync:
+    name: AppSyncBackOfficeWeb
+    authenticationType: API_KEY
+    apiKeys:
+      - testLocalKey
+    mappingTemplates:
+      - dataSource: sourceLambda
+        type: Mutation
+        field: userLogin
+        request: 'userLogin.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda
+        type: Query
+        field: refreshJWT
+        request: 'refreshToken.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda	      
+        type: Mutation
+        field: createSnsEndpoint
+        request: 'createSnsEndpoint.request.vtl'
+        response: 'global.response.vtl'
+      # common
+      - dataSource: sourceLambda
+        type: Query
+        field: inboxDashboard
+        request: 'inboxDashboard.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda
+        type: Mutation
+        field: updateInbox
+        request: 'updateInbox.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda
+        type: Query
+        field: adviserSummary
+        request: 'adviserSummary.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda
+        type: Query
+        field: getOrderSummary
+        request: 'getOrderSummary.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda
+        type: Query
+        field: transactionReasonList
+        request: 'transactionReasonList.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda
+        type: Query
+        field: userProfile
+        request: 'userProfile.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda
+        type: Mutation
+        field: updateSeen
+        request: 'updateSeen.request.vtl'
+        response: 'global.response.vtl'
+      # amla  
+      - dataSource: sourceLambda
+        type: Query
+        field: amlaDashboard
+        request: 'amlaDashboard.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda
+        type: Query
+        field: caseSelection
+        request: 'caseSelection.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda
+        type: Query
+        field: caseDefinition
+        request: 'caseDefinition.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda
+        type: Mutation
+        field: createCase
+        request: 'createCase.request.vtl'
+        response: 'global.response.vtl'  
+      - dataSource: sourceLambda
+        type: Query
+        field: questionSelection
+        request: 'questionSelection.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda
+        type: Query
+        field: caseDetails
+        request: 'caseDetails.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda
+        type: Query
+        field: eddReasonList
+        request: 'eddReasonList.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda
+        type: Mutation
+        field: caseStatus
+        request: 'caseStatus.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda
+        type: Query
+        field: generateEddReport
+        request: 'generateEddReport.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda
+        type: Query
+        field: generateEddReportMonthly
+        request: 'generateEddReportMonthly.request.vtl'
+        response: 'global.response.vtl'
+      # branch/ce
+      - dataSource: sourceLambda
+        type: Query
+        field: branchDashboard
+        request: 'branchDashboard.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda
+        type: Query
+        field: adviserDashboard
+        request: 'adviserDashboard.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda
+        type: Query
+        field: branchOffices
+        request: 'branchOffices.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda
+        type: Mutation
+        field: transactionStatus
+        request: 'transactionStatus.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda
+        type: Mutation
+        field: createTransactionsRef
+        request: 'createTransactionsRef.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda
+        type: Mutation
+        field: downloadDaily
+        request: 'downloadDaily.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda
+        type: Mutation
+        field: targetDateRequest
+        request: 'targetDateRequest.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda
+        type: Mutation
+        field: targetDateResponse
+        request: 'targetDateResponse.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda
+        type: Query
+        field: hqCeDashboard
+        request: 'hqCeDashboard.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda
+        type: Query
+        field: dashboardExportList
+        request: 'dashboardExportList.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda
+        type: Query
+        field: transactionRequest
+        request: 'transactionRequest.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda
+        type: Mutation
+        field: transactionCheckerStatus
+        request: 'transactionCheckerStatus.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda
+        type: Mutation
+        field: transactionReport
+        request: 'transactionReport.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda
+        type: Query
+        field: ppaDownload
+        request: 'ppaDownload.request.vtl'
+        response: 'global.response.vtl'
+      # hq
+      - dataSource: sourceLambda
+        type: Query
+        field: financeDashboard
+        request: 'financeDashboard.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda
+        type: Query
+        field: opsDashboard
+        request: 'opsDashboard.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda
+        type: Query
+        field: opsCasesDashboard
+        request: 'opsCasesDashboard.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda
+        type: Mutation
+        field: opsStatus
+        request: 'opsStatus.request.vtl'
+        response: 'global.response.vtl'
+      # system admin
+      - dataSource: sourceLambda
+        type: Mutation
+        field: createRole
+        request: 'createRole.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda
+        type: Mutation
+        field: editRole
+        request: 'editRole.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda
+        type: Mutation
+        field: createGroup
+        request: 'createGroup.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda
+        type: Mutation
+        field: editGroup
+        request: 'editGroup.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda
+        type: Mutation
+        field: createUser
+        request: 'createUserAdmin.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda
+        type: Mutation
+        field: editUser
+        request: 'editUser.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda
+        type: Query
+        field: getDropDownList
+        request: 'getDropDownList.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda
+        type: Query
+        field: systemAdminAdviserDashboard
+        request: 'systemAdminAdviserDashboard.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda
+        type: Query
+        field: systemAdminDashboard
+        request: 'systemAdminDashboard.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda
+        type: Query
+        field: activityLogDashboard
+        request: 'activityLogDashboard.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda
+        type: Mutation
+        field: userBulkUpload
+        request: 'userBulkUpload.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda
+        type: Mutation
+        field: enableOmni
+        request: 'enableOmni.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda
+        type: Mutation
+        field: userUpdateStatus
+        request: 'userUpdateStatus.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda
+        type: Mutation
+        field: approveReject
+        request: 'approveReject.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda
+        type: Query
+        field: agentProfile
+        request: 'agentProfile.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda
+        type: Query
+        field: getIdInformation
+        request: 'getIdInformation.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda
+        type: Query
+        field: systemAdminExport
+        request: 'systemAdminExport.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda
+        type: Mutation
+        field: validateDropdown
+        request: 'validateDropdown.request.vtl'
+        response: 'global.response.vtl'
+      # finance
+      - dataSource: sourceLambda
+        type: Query
+        field: financeCasesDashboard
+        request: 'financeCasesDashboard.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda
+        type: Mutation
+        field: financeStatus
+        request: 'financeStatus.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda
+        type: Query
+        field: fundDataDashboard
+        request: 'fundDataDashboard.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda
+        type: Query
+        field: fundSummary
+        request: 'fundSummary.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda
+        type: Query
+        field: distributionHistory
+        request: 'distributionHistory.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda
+        type: Query
+        field: fundDocumentDashboard
+        request: 'fundDocumentDashboard.request.vtl'
+        response: 'global.response.vtl'
+      # test 
+      - dataSource: sourceLambda
+        type: Query
+        field: test
+        request: 'test.request.vtl'
+        response: 'global.response.vtl'  
+      - dataSource: sourceLambda
+        type: Mutation
+        field: populateEdd
+        request: 'populateEdd.request.vtl'
+        response: 'global.response.vtl'  
+      - dataSource: sourceLambda
+        type: Mutation
+        field: fundUpload
+        request: 'fundUpload.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda
+        type: Query
+        field: fundUploadData
+        request: 'fundUploadData.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda
+        type: Mutation
+        field: fundStatus
+        request: 'fundUploadStatus.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda
+        type: Mutation
+        field: bulkUpload
+        request: 'bulkUpload.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda
+        type: Mutation
+        field: bulkUploadStatus
+        request: 'bulkUploadStatus.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda
+        type: Query
+        field: getLogData
+        request: 'getLogData.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda
+        type: Query
+        field: transactionPdf
+        request: 'transactionPdf.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda
+        type: Mutation
+        field: dailySummaryReport
+        request: 'dailySummaryReport.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda
+        type: Query
+        field: dailySummaryCount
+        request: 'dailySummaryCount.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda
+        type: Query
+        field: fileCheck
+        request: 'fileCheck.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda
+        type: Query
+        field: systemAdminInboxData
+        request: 'systemAdminInboxData.request.vtl'
+        response: 'global.response.vtl'
+      - dataSource: sourceLambda
+        type: Query
+        field: logOut
+        request: 'logOut.request.vtl'
+        response: 'global.response.vtl'
+    dataSources:
+      - type: AWS_LAMBDA
+        name: sourceLambda
+        config:
+          functionName: BackOfficeWeb
+  appsync-offline:
+    schema: schema.graphql
+    port: 62222
+    dynamodb:
+      client:
+        endpoint: "http://localhost:8000"
+        region: localhost
+      

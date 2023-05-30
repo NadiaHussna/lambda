@@ -1,0 +1,5 @@
+{
+  "watch": ["utils", "src", "templates"],
+  "ext": ".ts,.js,.html",
+  "ignore": []
+}
